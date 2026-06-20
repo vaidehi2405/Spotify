@@ -21,6 +21,7 @@ import {
   refinePoorQualitySystemPrompt,
 } from '../prompts/refinePoorQualityPrompt';
 import { AnalysisSummary } from '../types/analysis';
+import { normalizeSentimentFromText } from '../utils/sentiment';
 
 export async function analyzePendingReviews(): Promise<number> {
   const pendingReviews = await getUnanalyzedReviews();
@@ -55,6 +56,8 @@ export async function analyzePendingReviews(): Promise<number> {
           failedReviewIds.push(review.id);
           return null;
         }
+
+        analyzedData.sentiment = normalizeSentimentFromText(review.review_text, analyzedData.sentiment);
 
         await saveAnalyzedReview({
           raw_review_id: review.id,
@@ -549,7 +552,6 @@ export async function generateAnalysisSummary(): Promise<AnalysisSummary> {
   const totalAnalyzedReviews = analyzedReviews.length;
 
   const sources = {
-    Reddit: rawReviews.filter(r => r.platform.toLowerCase() === 'reddit').length,
     PlayStore: rawReviews.filter(r => r.platform.toLowerCase().includes('play store') || r.platform.toLowerCase().includes('android')).length,
     AppStore: rawReviews.filter(r => r.platform.toLowerCase().includes('app store') || r.platform.toLowerCase().includes('ios')).length,
     SpotifyCommunity: rawReviews.filter(r => {
@@ -790,6 +792,8 @@ export async function reanalyzeReviewsFromFile(limit?: number): Promise<number> 
         continue;
       }
 
+      analyzedData.sentiment = normalizeSentimentFromText(review.review_text, analyzedData.sentiment);
+
       // Check for second-pass fallback
       let isFallback = false;
       const subReasons = [
@@ -1001,7 +1005,7 @@ export async function importClassifiedReviews(): Promise<void> {
       pain_point: r.analysis.pain_point,
       discovery_behavior: r.analysis.discovery_behavior,
       user_need: r.analysis.user_need,
-      sentiment: r.analysis.sentiment,
+      sentiment: normalizeSentimentFromText(r.review_text || '', r.analysis.sentiment),
       theme: r.analysis.theme,
       summary: r.analysis.summary,
       confidence: r.analysis.confidence,

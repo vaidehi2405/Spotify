@@ -2,6 +2,7 @@ export let isRateLimited = false;
 
 import { OTHER_UNSPECIFIED, PoorQualitySubReason } from '../prompts/refinePoorQualityPrompt';
 import { callGeminiAPI, isGeminiRateLimited } from './geminiClient';
+import { normalizeSentimentFromText } from '../utils/sentiment';
 
 export function isGroqRateLimited(): boolean {
   return isRateLimited;
@@ -106,6 +107,9 @@ async function callWithGemini(prompt: string, systemPrompt: string): Promise<str
 
 
 function getMockResponse(prompt: string, systemPrompt: string): string {
+  if (systemPrompt.includes('category selector')) {
+    return mockSelectCategories(prompt);
+  }
   if (systemPrompt.includes('second-pass classification')) {
     return mockRefinePoorQuality(prompt);
   }
@@ -125,6 +129,77 @@ function getMockResponse(prompt: string, systemPrompt: string): string {
   } else {
     return mockAnswerQuestion(prompt);
   }
+}
+
+
+function extractAvailableCategories(prompt: string): string[] {
+  const section = prompt.split('Available pain point categories with counts:')[1]?.split('Available themes with counts:')[0] || '';
+  return section
+    .split('\n')
+    .map(line => line.replace(/^-\s*/, '').replace(/\s*\(\d+\)\s*$/, '').trim())
+    .filter(Boolean);
+}
+
+function mockSelectCategories(prompt: string): string {
+  const question = prompt.match(/User question: \"([^\"]*)\"/)?.[1] || prompt;
+  const lower = question.toLowerCase();
+  const categories = extractAvailableCategories(prompt);
+  const findCategory = (needle: string) => categories.find(c => c.toLowerCase() === needle.toLowerCase());
+
+  if (lower.includes('ipl') || lower.includes('cricket') || lower.includes('wrapped')) {
+    return JSON.stringify({
+      intent: 'off_topic',
+      selected_pain_points: [],
+      selected_themes: [],
+      rationale: 'The question is not about Spotify music discovery or recommendation review pain points.'
+    });
+  }
+
+  if (lower.includes('what is frustrating') || lower.includes('frustrating users') || lower.includes('pain points') || lower.includes('user frustrations') || lower.includes('unmet need') || lower.includes('unmet needs') || lower.includes('user needs') || lower.includes('across reviews') || lower.includes('consistently across reviews')) {
+    return JSON.stringify({
+      intent: 'broad',
+      selected_pain_points: categories,
+      selected_themes: [],
+      rationale: 'The question broadly asks about Spotify music discovery, recommendation frustrations, or unmet user needs across reviews.'
+    });
+  }
+
+  if (lower.includes('smart shuffle') || lower.includes('shuffle')) {
+    const category = findCategory('Smart Shuffle forces the same popular songs');
+    return JSON.stringify({
+      intent: 'narrow',
+      selected_pain_points: category ? [category] : [],
+      selected_themes: ['Smart Shuffle'],
+      rationale: 'The question specifically asks about Spotify Smart Shuffle recommendation problems.'
+    });
+  }
+
+  if (lower.includes('discover weekly')) {
+    const category = findCategory('Discover Weekly repeats songs I already know');
+    return JSON.stringify({
+      intent: 'narrow',
+      selected_pain_points: category ? [category] : [],
+      selected_themes: ['Discover Weekly'],
+      rationale: 'The question specifically asks about Spotify Discover Weekly recommendation problems.'
+    });
+  }
+
+  if (lower.includes('podcast')) {
+    const category = findCategory('Podcasts clutter the music discovery feed');
+    return JSON.stringify({
+      intent: 'narrow',
+      selected_pain_points: category ? [category] : [],
+      selected_themes: ['Podcasts'],
+      rationale: 'The question specifically asks about Spotify podcasts in discovery surfaces.'
+    });
+  }
+
+  return JSON.stringify({
+    intent: 'off_topic',
+    selected_pain_points: [],
+    selected_themes: [],
+    rationale: 'The question is not clearly about Spotify music discovery or recommendation review pain points.'
+  });
 }
 
 function mockExpandQuery(prompt: string): string {
@@ -194,7 +269,7 @@ function mockAnalyzeReview(prompt: string): string {
       pain_point: "not_relevant",
       discovery_behavior: "not_relevant",
       user_need: "not_relevant",
-      sentiment: "negative",
+      sentiment: normalizeSentimentFromText(reviewText, "negative"),
       theme: "Unrelated",
       summary: "Review is about app performance, bugs, or payment issues rather than music discovery.",
       confidence: "high"
@@ -297,9 +372,7 @@ function mockAnalyzeReview(prompt: string): string {
     summary = "General dissatisfaction with the quality of Spotify's music recommendations.";
   }
 
-  if (lower.includes("love") || lower.includes("great") || lower.includes("good") || lower.includes("fine")) {
-    sentiment = "neutral";
-  }
+  sentiment = normalizeSentimentFromText(reviewText, sentiment);
 
   return JSON.stringify({
     pain_point,
@@ -453,7 +526,15 @@ function mockAnswerQuestion(prompt: string): string {
   let answer = "";
   let answer_points: string[] = [];
 
-  if (lower.includes('weekly') || lower.includes('discover weekly')) {
+  if (lower.includes('what is frustrating') || lower.includes('frustrating users') || lower.includes('user frustrations') || lower.includes('pain points') || lower.includes('unmet need') || lower.includes('unmet needs') || lower.includes('user needs') || lower.includes('across reviews')) {
+    answer = "Based on analyzed Spotify reviews, users are mainly frustrated by recommendation quality, missing discovery controls, repetitive surfaces, and clutter in discovery experiences:";
+    answer_points = [
+      "**Taste Mismatch**: Many reviews say recommendations do not reflect what users actually want to hear.",
+      "**Missing Controls**: Users want more ways to steer, filter, or reset discovery experiences.",
+      "**Repetition**: Smart Shuffle, mixes, radio, and discovery playlists can feel stale or repetitive.",
+      "**Discovery Clutter**: Podcasts and mainstream suggestions can crowd out organic music discovery."
+    ];
+  } else if (lower.includes('weekly') || lower.includes('discover weekly')) {
     answer = "Based on the analyzed user reviews, Spotify's Discover Weekly is facing several criticisms:";
     answer_points = [
       "**Stale Recommendations**: The algorithm replays the same 20–30 familiar artists rather than introducing new ones.",

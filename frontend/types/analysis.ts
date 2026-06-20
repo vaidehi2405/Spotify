@@ -2,7 +2,6 @@ export interface AnalysisSummary {
   totalReviews: number;
   totalAnalyzedReviews: number;
   sources: {
-    Reddit: number;
     PlayStore: number;
     AppStore: number;
     SpotifyCommunity: number;
