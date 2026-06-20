@@ -9,7 +9,7 @@ interface ChatTurn {
   question: string;
   answer: string;
   answer_points?: string[];
-  source_counts: { PlayStore: number; AppStore: number };
+  source_counts: { PlayStore: number; AppStore: number; SpotifyCommunity?: number };
   supporting_reviews: any[];
 }
 
@@ -155,33 +155,40 @@ export default function AskView() {
                     </div>
 
                     {/* Sources Badge */}
-                    {turn.source_counts && (turn.source_counts.PlayStore + turn.source_counts.AppStore > 0) && (
-                      <div className="bg-background border border-divider rounded-xl p-4 flex flex-col gap-3">
-                        <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
-                          Based on {(turn.source_counts?.PlayStore || 0) + (turn.source_counts?.AppStore || 0)} reviews from 2 sources
-                        </span>
-                        <div className="flex items-center gap-6">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
-                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-xs font-bold">Play Store</span>
-                              <span className="text-[10px] text-muted">{turn.source_counts?.PlayStore || 0} reviews</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
-                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.14 1.36-.59 2.57-1.4 3.39-.85.86-2.11 1.44-3.14 1.36-.18-1.31.86-2.43 1.6-3.25z"/></svg>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-xs font-bold">App Store</span>
-                              <span className="text-[10px] text-muted">{turn.source_counts?.AppStore || 0} reviews</span>
-                            </div>
+                    {turn.source_counts && (() => {
+                      const sources = [
+                        { label: 'Play Store', count: turn.source_counts.PlayStore || 0, color: 'green' },
+                        { label: 'App Store', count: turn.source_counts.AppStore || 0, color: 'blue' },
+                        { label: 'Spotify Community', count: turn.source_counts.SpotifyCommunity || 0, color: 'spotify' },
+                      ].filter(source => source.count > 0);
+                      const totalReviews = sources.reduce((sum, source) => sum + source.count, 0);
+
+                      return totalReviews > 0 ? (
+                        <div className="bg-background border border-divider rounded-xl p-4 flex flex-col gap-3">
+                          <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                            Based on {totalReviews} reviews from {sources.length} {sources.length === 1 ? 'source' : 'sources'}
+                          </span>
+                          <div className="flex flex-wrap items-center gap-6">
+                            {sources.map(source => (
+                              <div key={source.label} className="flex items-center gap-2">
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                  source.color === 'green' ? 'bg-green-500/10 text-green-500' :
+                                  source.color === 'blue' ? 'bg-blue-500/10 text-blue-500' :
+                                  source.color === 'spotify' ? 'bg-spotify/10 text-spotify' :
+                                  'bg-spotify/10 text-spotify'
+                                }`}>
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-bold">{source.label}</span>
+                                  <span className="text-[10px] text-muted">{source.count} reviews</span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                      </div>
-                    )}
+                      ) : null;
+                    })()}
 
                     {/* Expandable Supporting Reviews */}
                     {turn.supporting_reviews && (
