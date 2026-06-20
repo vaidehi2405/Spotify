@@ -170,11 +170,47 @@ function normalizeSelection(parsed: any, inventory: CategoryInventory): Category
   };
 }
 
+function isBroadReviewResearchQuestion(question: string): boolean {
+  const lower = question.toLowerCase();
+  const asksAboutNeedsOrPatterns =
+    lower.includes('unmet need') ||
+    lower.includes('unmet needs') ||
+    lower.includes('user needs') ||
+    lower.includes('needs emerge') ||
+    lower.includes('patterns') ||
+    lower.includes('themes') ||
+    lower.includes('trends') ||
+    lower.includes('consistently');
+  const pointsAtReviewCorpus =
+    lower.includes('review') ||
+    lower.includes('reviews') ||
+    lower.includes('users') ||
+    lower.includes('feedback');
+
+  return asksAboutNeedsOrPatterns && pointsAtReviewCorpus;
+}
+
+function broadSelectionFromInventory(inventory: CategoryInventory, rationale: string): CategorySelection {
+  return {
+    intent: 'broad',
+    selected_pain_points: inventory.painPoints.map(c => c.name),
+    selected_themes: [],
+    rationale,
+  };
+}
+
 function rationaleExplicitlySpotifyDiscoveryRelated(rationale: string): boolean {
   return /music discovery|recommendation|recommendations|playlist discovery|discover weekly|smart shuffle|release radar|daily mix|daily mixes|spotify radio|podcast.*discovery|discovery surface/i.test(rationale);
 }
 
 export async function selectRelevantCategories(question: string, inventory: CategoryInventory): Promise<CategorySelection> {
+  if (isBroadReviewResearchQuestion(question)) {
+    return broadSelectionFromInventory(
+      inventory,
+      'The question asks for broad unmet needs or patterns across the existing Spotify review corpus.'
+    );
+  }
+
   const prompt = `User question: "${question}"
 
 Available pain point categories with counts:
@@ -192,11 +228,7 @@ ${inventory.themes.map(c => `- ${c.name} (${c.count})`).join('\n')}`;
     // own rationale explicitly says the question is Spotify/music-discovery-related.
     if (selection.intent !== 'off_topic' && selection.selected_pain_points.length === 0) {
       if (rationaleExplicitlySpotifyDiscoveryRelated(selection.rationale)) {
-        return {
-          ...selection,
-          intent: 'broad',
-          selected_pain_points: inventory.painPoints.map(c => c.name),
-        };
+        return broadSelectionFromInventory(inventory, selection.rationale);
       }
       return { ...selection, intent: 'off_topic', selected_pain_points: [], selected_themes: [] };
     }
@@ -278,10 +310,19 @@ export function retrieveReviewsByCategories(
   }));
 }
 
+function getEmptySourceCounts() {
+  return { PlayStore: 0, AppStore: 0, SpotifyCommunity: 0 };
+}
+
 function countSourcesForRetrieved(retrieved: CategoryRetrievedReview[]) {
   return {
     PlayStore: retrieved.filter(r => r.raw?.platform.toLowerCase().includes('play store') || r.raw?.platform.toLowerCase().includes('android')).length,
     AppStore: retrieved.filter(r => r.raw?.platform.toLowerCase().includes('app store') || r.raw?.platform.toLowerCase().includes('ios')).length,
+    SpotifyCommunity: retrieved.filter(r => {
+      const platform = r.raw?.platform.toLowerCase() || '';
+      const source = r.raw?.source.toLowerCase() || '';
+      return platform.includes('spotify community') || source.includes('spotify community');
+    }).length,
   };
 }
 
@@ -450,7 +491,7 @@ export async function answerQuestion(question: string): Promise<AskQuestionRespo
     return {
       answer: REDIRECT_ANSWER,
       answer_points: [],
-      source_counts: { PlayStore: 0, AppStore: 0 },
+      source_counts: getEmptySourceCounts(),
       supporting_reviews: [],
       debug: {
         ...selection,
@@ -558,7 +599,7 @@ ${reviewsContext}`;
     if (!answer && answer_points.length === 0) answer = cleaned;
   }
 
-  const source_counts = used_reviews ? countSourcesForRetrieved(retrieved) : { PlayStore: 0, AppStore: 0 };
+  const source_counts = used_reviews ? countSourcesForRetrieved(retrieved) : getEmptySourceCounts();
 
   const response: AskQuestionResponse & { debug?: AskDebugInfo } = {
     answer,

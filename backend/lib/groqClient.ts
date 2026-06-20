@@ -154,12 +154,12 @@ function mockSelectCategories(prompt: string): string {
     });
   }
 
-  if (lower.includes('what is frustrating') || lower.includes('frustrating users') || lower.includes('pain points') || lower.includes('user frustrations')) {
+  if (lower.includes('what is frustrating') || lower.includes('frustrating users') || lower.includes('pain points') || lower.includes('user frustrations') || lower.includes('unmet need') || lower.includes('unmet needs') || lower.includes('user needs') || lower.includes('across reviews') || lower.includes('consistently across reviews')) {
     return JSON.stringify({
       intent: 'broad',
       selected_pain_points: categories,
       selected_themes: [],
-      rationale: 'The question broadly asks about Spotify music discovery and recommendation frustrations.'
+      rationale: 'The question broadly asks about Spotify music discovery, recommendation frustrations, or unmet user needs across reviews.'
     });
   }
 
@@ -527,7 +527,7 @@ function mockAnswerQuestion(prompt: string): string {
   let answer = "";
   let answer_points: string[] = [];
 
-  if (lower.includes('what is frustrating') || lower.includes('frustrating users') || lower.includes('user frustrations') || lower.includes('pain points')) {
+  if (lower.includes('what is frustrating') || lower.includes('frustrating users') || lower.includes('user frustrations') || lower.includes('pain points') || lower.includes('unmet need') || lower.includes('unmet needs') || lower.includes('user needs') || lower.includes('across reviews')) {
     answer = "Based on analyzed Spotify reviews, users are mainly frustrated by recommendation quality, missing discovery controls, repetitive surfaces, and clutter in discovery experiences:";
     answer_points = [
       "**Taste Mismatch**: Many reviews say recommendations do not reflect what users actually want to hear.",
