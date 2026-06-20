@@ -278,19 +278,10 @@ export function retrieveReviewsByCategories(
   }));
 }
 
-function getEmptySourceCounts() {
-  return { PlayStore: 0, AppStore: 0, SpotifyCommunity: 0 };
-}
-
 function countSourcesForRetrieved(retrieved: CategoryRetrievedReview[]) {
   return {
     PlayStore: retrieved.filter(r => r.raw?.platform.toLowerCase().includes('play store') || r.raw?.platform.toLowerCase().includes('android')).length,
     AppStore: retrieved.filter(r => r.raw?.platform.toLowerCase().includes('app store') || r.raw?.platform.toLowerCase().includes('ios')).length,
-    SpotifyCommunity: retrieved.filter(r => {
-      const platform = r.raw?.platform.toLowerCase() || '';
-      const source = r.raw?.source.toLowerCase() || '';
-      return platform.includes('spotify community') || source.includes('spotify community');
-    }).length,
   };
 }
 
@@ -459,7 +450,7 @@ export async function answerQuestion(question: string): Promise<AskQuestionRespo
     return {
       answer: REDIRECT_ANSWER,
       answer_points: [],
-      source_counts: getEmptySourceCounts(),
+      source_counts: { PlayStore: 0, AppStore: 0 },
       supporting_reviews: [],
       debug: {
         ...selection,
@@ -567,7 +558,7 @@ ${reviewsContext}`;
     if (!answer && answer_points.length === 0) answer = cleaned;
   }
 
-  const source_counts = used_reviews ? countSourcesForRetrieved(retrieved) : getEmptySourceCounts();
+  const source_counts = used_reviews ? countSourcesForRetrieved(retrieved) : { PlayStore: 0, AppStore: 0 };
 
   const response: AskQuestionResponse & { debug?: AskDebugInfo } = {
     answer,
