@@ -2,6 +2,7 @@ export let isRateLimited = false;
 
 import { OTHER_UNSPECIFIED, PoorQualitySubReason } from '../prompts/refinePoorQualityPrompt';
 import { callGeminiAPI, isGeminiRateLimited } from './geminiClient';
+import { normalizeSentimentFromText } from '../utils/sentiment';
 
 export function isGroqRateLimited(): boolean {
   return isRateLimited;
@@ -268,7 +269,7 @@ function mockAnalyzeReview(prompt: string): string {
       pain_point: "not_relevant",
       discovery_behavior: "not_relevant",
       user_need: "not_relevant",
-      sentiment: "negative",
+      sentiment: normalizeSentimentFromText(reviewText, "negative"),
       theme: "Unrelated",
       summary: "Review is about app performance, bugs, or payment issues rather than music discovery.",
       confidence: "high"
@@ -371,9 +372,7 @@ function mockAnalyzeReview(prompt: string): string {
     summary = "General dissatisfaction with the quality of Spotify's music recommendations.";
   }
 
-  if (lower.includes("love") || lower.includes("great") || lower.includes("good") || lower.includes("fine")) {
-    sentiment = "neutral";
-  }
+  sentiment = normalizeSentimentFromText(reviewText, sentiment);
 
   return JSON.stringify({
     pain_point,
