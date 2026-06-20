@@ -1,6 +1,7 @@
 import { getAllAnalyzedReviews, getAllRawReviews } from './reviewService';
 import { callGroqAPI } from '../lib/groqClient';
 import { askAnswerSystemPrompt } from '../prompts/askAnswerPrompt';
+import { categorySelectionSystemPrompt } from '../prompts/categorySelectionPrompt';
 import { AskQuestionResponse } from '../types/ask';
 import { supabaseAdmin } from '../lib/supabaseAdmin';
 import { RawReview, AnalyzedReview } from '../types/review';
@@ -55,6 +56,235 @@ interface ScoredReview {
   raw: RawReview | undefined;
   score: number;
 }
+interface CategoryCount {
+  name: string;
+  count: number;
+}
+
+interface CategoryInventory {
+  painPoints: CategoryCount[];
+  themes: CategoryCount[];
+}
+
+type CategoryIntent = 'narrow' | 'broad' | 'off_topic';
+
+interface CategorySelection {
+  intent: CategoryIntent;
+  selected_pain_points: string[];
+  selected_themes: string[];
+  rationale: string;
+}
+
+interface CategoryRetrievedReview {
+  analyzed: AnalyzedReview;
+  raw: RawReview | undefined;
+  category: string;
+}
+
+export interface AskDebugInfo {
+  intent: CategoryIntent;
+  selected_pain_points: string[];
+  selected_themes: string[];
+  rationale: string;
+  category_counts: CategoryCount[];
+  sampled_reviews: Array<{
+    id: string;
+    platform: string;
+    pain_point: string | null;
+    theme: string | null;
+    text_preview: string;
+  }>;
+  generated_answer: string;
+  generated_answer_points: string[];
+}
+
+const REDIRECT_ANSWER = "This is a research tool for analyzing Spotify user reviews about music discovery and recommendations, so I don't have the right review data to answer that. Try asking about recommendations, Smart Shuffle, Discover Weekly, podcasts, playlist discovery, or other Spotify discovery topics.";
+
+function isRelevantCategory(value: string | null | undefined): value is string {
+  return !!value && value.toLowerCase() !== 'not relevant' && value.toLowerCase() !== 'not_relevant';
+}
+
+function topCounts(counts: Record<string, number>): CategoryCount[] {
+  return Object.entries(counts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+
+export function buildCategoryInventory(analyzedReviews: AnalyzedReview[]): CategoryInventory {
+  const painPointCounts: Record<string, number> = {};
+  const themeCounts: Record<string, number> = {};
+
+  for (const review of analyzedReviews) {
+    if (isRelevantCategory(review.pain_point)) {
+      painPointCounts[review.pain_point] = (painPointCounts[review.pain_point] || 0) + 1;
+    }
+    if (isRelevantCategory(review.theme)) {
+      themeCounts[review.theme] = (themeCounts[review.theme] || 0) + 1;
+    }
+  }
+
+  return {
+    painPoints: topCounts(painPointCounts),
+    themes: topCounts(themeCounts),
+  };
+}
+
+function parseJsonObject(raw: string): any | null {
+  try {
+    let cleaned = raw.trim();
+    if (cleaned.startsWith('```')) {
+      cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, '').replace(/\s*```$/, '').trim();
+    }
+    cleaned = cleaned.replace(/,(\s*[\]}])/g, '$1');
+    return JSON.parse(cleaned);
+  } catch {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try {
+      return JSON.parse(match[0].replace(/,(\s*[\]}])/g, '$1'));
+    } catch {
+      return null;
+    }
+  }
+}
+
+function normalizeSelection(parsed: any, inventory: CategoryInventory): CategorySelection {
+  const validPainPoints = new Set(inventory.painPoints.map(c => c.name));
+  const validThemes = new Set(inventory.themes.map(c => c.name));
+  const intent: CategoryIntent = parsed?.intent === 'narrow' || parsed?.intent === 'broad' || parsed?.intent === 'off_topic'
+    ? parsed.intent
+    : 'off_topic';
+
+  const selectedPainPoints = Array.isArray(parsed?.selected_pain_points)
+    ? parsed.selected_pain_points.filter((name: unknown): name is string => typeof name === 'string' && validPainPoints.has(name))
+    : [];
+  const selectedThemes = Array.isArray(parsed?.selected_themes)
+    ? parsed.selected_themes.filter((name: unknown): name is string => typeof name === 'string' && validThemes.has(name))
+    : [];
+
+  return {
+    intent,
+    selected_pain_points: intent === 'off_topic' ? [] : selectedPainPoints,
+    selected_themes: intent === 'off_topic' ? [] : selectedThemes,
+    rationale: typeof parsed?.rationale === 'string' ? parsed.rationale.slice(0, 500) : '',
+  };
+}
+
+function rationaleExplicitlySpotifyDiscoveryRelated(rationale: string): boolean {
+  return /music discovery|recommendation|recommendations|playlist discovery|discover weekly|smart shuffle|release radar|daily mix|daily mixes|spotify radio|podcast.*discovery|discovery surface/i.test(rationale);
+}
+
+export async function selectRelevantCategories(question: string, inventory: CategoryInventory): Promise<CategorySelection> {
+  const prompt = `User question: "${question}"
+
+Available pain point categories with counts:
+${inventory.painPoints.map(c => `- ${c.name} (${c.count})`).join('\n')}
+
+Available themes with counts:
+${inventory.themes.map(c => `- ${c.name} (${c.count})`).join('\n')}`;
+
+  try {
+    const raw = await callGroqAPI(prompt, categorySelectionSystemPrompt);
+    const parsed = parseJsonObject(raw);
+    const selection = normalizeSelection(parsed, inventory);
+
+    // Strict fallback: only recover from an empty category list when the selector's
+    // own rationale explicitly says the question is Spotify/music-discovery-related.
+    if (selection.intent !== 'off_topic' && selection.selected_pain_points.length === 0) {
+      if (rationaleExplicitlySpotifyDiscoveryRelated(selection.rationale)) {
+        return {
+          ...selection,
+          intent: 'broad',
+          selected_pain_points: inventory.painPoints.map(c => c.name),
+        };
+      }
+      return { ...selection, intent: 'off_topic', selected_pain_points: [], selected_themes: [] };
+    }
+
+    return selection;
+  } catch (err: any) {
+    console.warn('[askService] Failed to select categories:', err.message);
+    return { intent: 'off_topic', selected_pain_points: [], selected_themes: [], rationale: 'Category selection failed.' };
+  }
+}
+
+function compareReviewsForSampling(a: AnalyzedReview, b: AnalyzedReview): number {
+  const sentimentRank = (sentiment: string | null) => sentiment?.toLowerCase() === 'negative' ? 0 : sentiment?.toLowerCase() === 'neutral' ? 1 : 2;
+  const confidenceRank = (confidence: string | null) => confidence?.toLowerCase() === 'high' ? 0 : confidence?.toLowerCase() === 'medium' ? 1 : 2;
+  return sentimentRank(a.sentiment) - sentimentRank(b.sentiment)
+    || confidenceRank(a.confidence) - confidenceRank(b.confidence)
+    || (a.created_at || '').localeCompare(b.created_at || '');
+}
+
+export function retrieveReviewsByCategories(
+  selection: CategorySelection,
+  analyzedReviews: AnalyzedReview[],
+  rawReviews: RawReview[],
+  limit = selection.intent === 'broad' ? 36 : 12
+): CategoryRetrievedReview[] {
+  if (selection.intent === 'off_topic' || selection.selected_pain_points.length === 0) return [];
+
+  const rawMap = new Map<string, RawReview>();
+  for (const raw of rawReviews) rawMap.set(raw.id, raw);
+
+  const selectedPainPoints = new Set(selection.selected_pain_points);
+  const selectedThemes = new Set(selection.selected_themes);
+  const matched = analyzedReviews
+    .filter(review => isRelevantCategory(review.pain_point))
+    .filter(review => selectedPainPoints.has(review.pain_point || '') || selectedThemes.has(review.theme || ''));
+
+  if (selection.intent !== 'broad') {
+    return matched
+      .sort(compareReviewsForSampling)
+      .slice(0, limit)
+      .map(review => ({ analyzed: review, raw: rawMap.get(review.raw_review_id), category: review.pain_point || review.theme || 'Feedback' }));
+  }
+
+  const byCategory = new Map<string, AnalyzedReview[]>();
+  for (const review of matched) {
+    const category = review.pain_point || review.theme || 'Feedback';
+    if (!byCategory.has(category)) byCategory.set(category, []);
+    byCategory.get(category)!.push(review);
+  }
+
+  const categoryOrder = selection.selected_pain_points.filter(category => byCategory.has(category));
+  const perCategory = Math.max(1, Math.floor(limit / Math.max(1, categoryOrder.length)));
+  const selected: AnalyzedReview[] = [];
+
+  for (const category of categoryOrder) {
+    selected.push(...byCategory.get(category)!.sort(compareReviewsForSampling).slice(0, perCategory));
+  }
+
+  let cursor = 0;
+  while (selected.length < limit && categoryOrder.length > 0) {
+    let added = false;
+    for (const category of categoryOrder) {
+      const reviews = byCategory.get(category)!.sort(compareReviewsForSampling);
+      const next = reviews[perCategory + cursor];
+      if (next && !selected.includes(next)) {
+        selected.push(next);
+        added = true;
+        if (selected.length >= limit) break;
+      }
+    }
+    if (!added) break;
+    cursor++;
+  }
+
+  return selected.map(review => ({
+    analyzed: review,
+    raw: rawMap.get(review.raw_review_id),
+    category: review.pain_point || review.theme || 'Feedback',
+  }));
+}
+
+function countSourcesForRetrieved(retrieved: CategoryRetrievedReview[]) {
+  return {
+    PlayStore: retrieved.filter(r => r.raw?.platform.toLowerCase().includes('play store') || r.raw?.platform.toLowerCase().includes('android')).length,
+    AppStore: retrieved.filter(r => r.raw?.platform.toLowerCase().includes('app store') || r.raw?.platform.toLowerCase().includes('ios')).length,
+  };
+}
+
 
 export function retrieveRelevantReviews(
   query: string,
@@ -205,58 +435,84 @@ User question: "${question}"`;
   }
 }
 
-export async function answerQuestion(question: string): Promise<AskQuestionResponse> {
+export async function answerQuestion(question: string): Promise<AskQuestionResponse & { debug?: AskDebugInfo }> {
   const analyzedReviews = await getAllAnalyzedReviews();
   const rawReviews = await getAllRawReviews();
+  const inventory = buildCategoryInventory(analyzedReviews);
+  const selection = await selectRelevantCategories(question, inventory);
 
-  // Expand query using LLM before retrieval
-  const expandedKeywords = await expandQuery(question);
-  const combinedQuery = expandedKeywords ? `${question}, ${expandedKeywords}` : question;
+  console.log(`[askService] Question: "${question}"`);
+  console.log(`[askService] Category Selection: ${JSON.stringify(selection)}`);
 
-  console.log(`[askService] Original Question: "${question}"`);
-  console.log(`[askService] Expanded Keywords: "${expandedKeywords}"`);
-  console.log(`[askService] Combined Query: "${combinedQuery}"`);
+  const categoryCounts = inventory.painPoints.filter(c => selection.selected_pain_points.includes(c.name));
 
-  // Retrieve top 10 relevant reviews using TF-IDF cosine similarity vector match on combined query
-  const retrieved = retrieveRelevantReviews(combinedQuery, analyzedReviews, rawReviews, 10);
-
-  if (retrieved.length === 0) {
+  if (selection.intent === 'off_topic' || selection.selected_pain_points.length === 0) {
     return {
-      answer: "",
+      answer: REDIRECT_ANSWER,
       answer_points: [],
       source_counts: { PlayStore: 0, AppStore: 0 },
       supporting_reviews: [],
+      debug: {
+        ...selection,
+        category_counts: categoryCounts,
+        sampled_reviews: [],
+        generated_answer: REDIRECT_ANSWER,
+        generated_answer_points: [],
+      }
     };
   }
 
-  // Build grounded context for the LLM using ONLY the retrieved relevant reviews
+  const retrieved = retrieveReviewsByCategories(selection, analyzedReviews, rawReviews);
+
+  if (retrieved.length === 0) {
+    const answer = "I found a Spotify-related question, but I don't have enough classified review evidence in the current dataset to answer it reliably. Try asking about recommendations, Smart Shuffle, Discover Weekly, podcasts, playlist discovery, or other music discovery topics.";
+    return {
+      answer,
+      answer_points: [],
+      source_counts: { PlayStore: 0, AppStore: 0 },
+      supporting_reviews: [],
+      debug: {
+        ...selection,
+        category_counts: categoryCounts,
+        sampled_reviews: [],
+        generated_answer: answer,
+        generated_answer_points: [],
+      }
+    };
+  }
+
   const reviewsContext = retrieved.map((r, index) => {
     return `[Review #${index + 1}]
 Source: ${r.raw?.platform || 'Unknown'}
-Text: ${r.raw?.review_text || ''}
 Pain Point: ${r.analyzed.pain_point || ''}
+Theme: ${r.analyzed.theme || ''}
+Sentiment: ${r.analyzed.sentiment || ''}
+Text: ${r.raw?.review_text || ''}
 Summary: ${r.analyzed.summary || ''}`;
   }).join('\n\n');
 
-  // Instruct LLM to hedge its answer if we have fewer than 3 reviews
+  const categoryContext = categoryCounts.map(c => `- ${c.name}: ${c.count} classified reviews`).join('\n');
+
   let hedgeInstruction = "";
   if (retrieved.length < 3) {
     hedgeInstruction = `
 [IMPORTANT - LIMITED DATA WARNING]
-Only ${retrieved.length} relevant user review(s) passed the similarity threshold for this query.
-Because data is extremely limited, you MUST:
-1. Hedge your answer explicitly (e.g., start with "Based on limited user feedback, ..." or "Only a few users have commented on this ...").
-2. Do NOT write a confident multi-bullet list or summary. Write a brief, single-paragraph explanation highlighting what the limited feedback mentions, and state that there are not enough reviews to provide a comprehensive analysis.
-3. Answer ONLY using the actual text from the ${retrieved.length} review(s) listed below. Do NOT use outside general knowledge or make assumptions outside these specific reviews.`;
+Only ${retrieved.length} relevant classified user review(s) were available for this query.
+Hedge your answer explicitly, keep it brief, and do not imply the evidence is comprehensive.`;
   }
 
   const prompt = `User Question: ${question}
+
+Selected retrieval intent: ${selection.intent}
+Selected pain point categories:
+${categoryContext}
 
 Instructions:
 1. Answer the User Question using ONLY the information provided in the Reviews below.
 2. Do NOT use general knowledge or make assumptions outside the provided reviews.
 3. If the provided reviews do not contain enough information to answer the question, state that you do not have enough relevant user reviews to answer.
 4. Keep the answer grounded and verifiable.
+5. For broad questions, emphasize the categories with larger classified-review counts while still using the real review text below as evidence.
 ${hedgeInstruction}
 
 Reviews:
@@ -269,22 +525,14 @@ ${reviewsContext}`;
   let used_reviews = true;
   
   try {
-    let cleaned = jsonString.trim();
-    if (cleaned.startsWith('```')) {
-      cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, '').replace(/\s*```$/, '').trim();
-    }
-    // Clean trailing commas in objects and arrays to prevent common parse failures
-    cleaned = cleaned.replace(/,(\s*[\]}])/g, '$1');
-    
-    const parsed = JSON.parse(cleaned);
+    const parsed = parseJsonObject(jsonString);
+    if (!parsed) throw new Error('No JSON object found');
     answer = parsed.answer || "";
-    answer_points = parsed.answer_points || [];
+    answer_points = Array.isArray(parsed.answer_points) ? parsed.answer_points : [];
     used_reviews = parsed.used_reviews ?? true;
   } catch (e: any) {
     console.warn('[askService] Failed to parse LLM response JSON. Error:', e.message);
     console.warn('[askService] Raw LLM Response:', jsonString);
-    
-    // Attempt parsing using robust regex fallback that supports multi-line answers and escaped characters
     const cleaned = jsonString.trim();
     const answerMatch = cleaned.match(/"answer"\s*:\s*"((?:[^"\\]|\\.)*)"/s);
     if (answerMatch && answerMatch[1]) {
@@ -294,7 +542,6 @@ ${reviewsContext}`;
         .replace(/\\t/g, '\t')
         .replace(/\\\\/g, '\\');
     }
-    
     const pointsMatch = cleaned.match(/"answer_points"\s*:\s*\[([\s\S]*?)\]/);
     if (pointsMatch && pointsMatch[1]) {
       const matches = pointsMatch[1].match(/"((?:[^"\\]|\\.)*)"/g);
@@ -306,24 +553,14 @@ ${reviewsContext}`;
           .replace(/\\\\/g, '\\'));
       }
     }
-    
     const usedReviewsMatch = cleaned.match(/"used_reviews"\s*:\s*(true|false)/);
-    if (usedReviewsMatch) {
-      used_reviews = usedReviewsMatch[1] === 'true';
-    }
-
-    if (!answer && answer_points.length === 0) {
-      answer = cleaned;
-    }
+    if (usedReviewsMatch) used_reviews = usedReviewsMatch[1] === 'true';
+    if (!answer && answer_points.length === 0) answer = cleaned;
   }
 
-  // Remove Reddit source counts entirely
-  const source_counts = {
-    PlayStore: used_reviews ? rawReviews.filter(r => r.platform.toLowerCase().includes('play store') || r.platform.toLowerCase().includes('android')).length : 0,
-    AppStore: used_reviews ? rawReviews.filter(r => r.platform.toLowerCase().includes('app store') || r.platform.toLowerCase().includes('ios')).length : 0,
-  };
+  const source_counts = used_reviews ? countSourcesForRetrieved(retrieved) : { PlayStore: 0, AppStore: 0 };
 
-  const response: AskQuestionResponse = {
+  const response: AskQuestionResponse & { debug?: AskDebugInfo } = {
     answer,
     answer_points,
     source_counts,
@@ -331,9 +568,21 @@ ${reviewsContext}`;
       ...r.analyzed,
       review_text: r.raw?.review_text || ''
     })) : [],
+    debug: {
+      ...selection,
+      category_counts: categoryCounts,
+      sampled_reviews: retrieved.map(r => ({
+        id: r.analyzed.id,
+        platform: r.raw?.platform || 'Unknown',
+        pain_point: r.analyzed.pain_point,
+        theme: r.analyzed.theme,
+        text_preview: (r.raw?.review_text || '').slice(0, 220),
+      })),
+      generated_answer: answer,
+      generated_answer_points: answer_points,
+    }
   };
 
-  // Log the question
   await supabaseAdmin.from('question_logs').insert([{
     question,
     answer,
