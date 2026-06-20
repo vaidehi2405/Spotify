@@ -549,7 +549,6 @@ export async function generateAnalysisSummary(): Promise<AnalysisSummary> {
   const totalAnalyzedReviews = analyzedReviews.length;
 
   const sources = {
-    Reddit: rawReviews.filter(r => r.platform.toLowerCase() === 'reddit').length,
     PlayStore: rawReviews.filter(r => r.platform.toLowerCase().includes('play store') || r.platform.toLowerCase().includes('android')).length,
     AppStore: rawReviews.filter(r => r.platform.toLowerCase().includes('app store') || r.platform.toLowerCase().includes('ios')).length,
     SpotifyCommunity: rawReviews.filter(r => {

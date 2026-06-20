@@ -7,9 +7,9 @@ export interface AskQuestionRequest {
 export interface AskQuestionResponse {
   answer: string;
   source_counts: {
-    Reddit: number;
     PlayStore: number;
     AppStore: number;
+    SpotifyCommunity: number;
   };
   supporting_reviews: AnalyzedReview[];
 }

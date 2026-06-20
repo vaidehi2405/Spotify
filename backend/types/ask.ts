@@ -27,6 +27,7 @@ export interface AskQuestionResponse {
   source_counts: {
     PlayStore: number;
     AppStore: number;
+    SpotifyCommunity: number;
   };
   supporting_reviews: (AnalyzedReview & { review_text?: string })[];
   debug?: AskDebugInfo;

@@ -469,7 +469,7 @@ export async function answerQuestion(question: string): Promise<AskQuestionRespo
     return {
       answer,
       answer_points: [],
-      source_counts: { PlayStore: 0, AppStore: 0 },
+      source_counts: getEmptySourceCounts(),
       supporting_reviews: [],
       debug: {
         ...selection,
