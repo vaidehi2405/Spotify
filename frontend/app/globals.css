@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Light mode (default) */
+:root {
+  --background: #ffffff;
+  --foreground: #121212; /* Spotify deep black */
+  --sidebar-bg: #f6f6f6;
+  --sidebar-border: #e5e5e5;
+  --card-bg: #ffffff;
+  --card-border: #e5e5e5;
+  --spotify-green: #1DB954;
+  --spotify-green-hover: #1ed760;
+  --text-muted: #535353;
+  --divider: #e5e5e5;
+  --user-msg-bg: #f0f0f0;
+  --ai-msg-bg: #ffffff;
+}
+
+/* Dark mode class */
+.dark {
+  --background: #121212; /* Spotify background */
+  --foreground: #ffffff;
+  --sidebar-bg: #000000;
+  --sidebar-border: #282828;
+  --card-bg: #181818;
+  --card-border: #282828;
+  --spotify-green: #1DB954;
+  --spotify-green-hover: #1ed760;
+  --text-muted: #b3b3b3;
+  --divider: #282828;
+  --user-msg-bg: #282828;
+  --ai-msg-bg: #181818;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar: var(--sidebar-bg);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-card: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-spotify: var(--spotify-green);
+  --color-spotify-hover: var(--spotify-green-hover);
+  --color-muted: var(--text-muted);
+  --color-divider: var(--divider);
+  --color-user-msg: var(--user-msg-bg);
+  --color-ai-msg: var(--ai-msg-bg);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

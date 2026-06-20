@@ -1,0 +1,362 @@
+=== ORIGINAL STOPWORDS ===
+
+QUERY: "What's wrong with podcast recommendations?"
+================================================================================
+Query tokens: [wrong, podcast, recommend]
+
+Total results above threshold (0.3): 1
+>>> THRESHOLD TRIGGERED: Less than 3 reviews clear 0.3. "Not enough relevant reviews found" message will show on UI.
+
+[#1] Score: 0.3707 | ✅ PASS
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "love the podcast on this app"
+
+[#2] Score: 0.2428 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "ads with premium?!!! I have a premium subscription, yet for some strange reason I started getting ads?!! why??? no ads on songs but with podcasts. some ads are within the podcast itself, so ok. but yesterday I had ads before the podcast..Spotify ads not related to the podcast. what is going on??"
+
+[#3] Score: 0.2390 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Title: How to remove and stop past podcasts from being recommended  Last year I was searching for some podcasts of specific interest but after giving a couple shows a try and not liking what I found I gave up and moved on. Now both of these podcasts are not only looming in my "Your Shows" despite having never followed them in the first place I am also getting notifications when new episodes are posted. I'm not following either, I never clicked like, and I'm sick of seeing them every time I open the app I pay for. How do you remove or block these shows so I never have to see them again?   --- Community replies --- 1. Hey folks, What I'd recommend is to look for the podcast in the Podcasts tab of your Home feed on the mobile app and tap the three dots on an episode > Not interested. Go to "Home" and select "Podcasts & Shows" at the top Find a podcast episode, tap the three dots menu and select "Not interested" Below are a few podcast- and customization-related ideas, which I think you'd like, so feel free to check them out and show your support by giving them a thumbs up: [Mobile][Other] Remove or manage “Your top podcasts” from mobile home screen [All Platforms] Customize Start Screen Take care. 2. Hey folks, What I'd recommend is to look for the podcast in the Podcasts tab of your Home feed on the mobile app and tap the three dots on an episode > Not interested. Go to "Home" and select "Podcasts & Shows" at the top Find a podcast episode, tap the three dots menu and select "Not interested" Below are a few podcast- and customization-related ideas, which I think you'd like, so feel free to check them out and show your support by giving them a thumbs up: [Mobile][Other] Remove or manage “Your top podcasts” from mobile home screen [All Platforms] Customize Start Screen Take care. YordanModeratorHelp others find this answer and click "Accept as Solution". What are Solutions exactly?If you appreciate an answer, maybe give it a "Like".Are you new to the Community? Take a moment to introduce yourself! View solution in original post 3. Hey @vin_sychem, Thank you for reaching out here in the Community. It's currently not possible to remove items from your Home screen, however, it seems like the Community folks have already created an Idea about being able to disable or hide podcasts entirely. If you'd like to see that option available, go ahead and check this idea here. While there's currently no way to customize your start screen, we'd suggest you give this idea a thumbs up, if this is something you'd like to see implemented in the future. Please note that even if an idea is currently set to “Not Right Now” you can still add your vote there as we revisit those ideas on regular intervals! If you're interested in how ideas work and how your feedback reaches the right teams here, check this page out. Hope this helps. If you ever have any other questions in the future, feel free to post in the Community again LyubkaModeratorHelp others find this answer and click "Accept as Solution".If you appreciate an answer, maybe give it a Like. 4. This is not true. The three dots only give you three choices; whether I wish to follow it, rate it, or share it. Even if you hit unfollow, the podcast won’t go away!! Frustrating"
+
+[#4] Score: 0.2363 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Title: Top Podcast Episodes Rating: 2 Stars  I want the top podcast episodes back"
+
+[#5] Score: 0.2156 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Title: Remove Recommand Podcast Channel from homepage  Hey, Can I give you some advice?I've played a podcast once, but I never followed it.Unfortunately, it sticks on my homepage and I cannot remove it.Can you add a feature to let me remove the podcast channel I'm not interested in?  --- Community replies --- 1. Hiya fam, To remove a podcast from your homepage on Spotify, you can try the following steps:Go to the "Podcasts" section of your Spotify app.Find the podcast that you want to remove from your homepage.Tap and hold on the podcast's icon or cover art until a menu appears.Select "Remove from Home" from the menu.The podcast should now be removed from your homepage.If the podcast still appears on your homepage after following these steps, try closing and reopening the Spotify app or logging out and back in to see if the changes have taken effect.I hope this helps, -Prague the Dog 2. Sorry, nothing appears when you press, long or short, title or cover art or icon . Three dots menu also have nothing in there. I have same problem as luckybastard 3. Exactly same problem. Solution suggested doesn't work (nothing appears as you press cover art or title) 4. Thanks for posting but this doesn't work for me on my Android ohone - when I hold the podcast icon no menu appears. Is there another way of removing them? This really should be an option."
+
+[#6] Score: 0.2153 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "It was amazing i recommend people to use this app"
+
+[#7] Score: 0.2000 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "best music app ever would recommend"
+
+[#8] Score: 0.1952 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "The recommendation system is fire 🔥🔥"
+
+[#9] Score: 0.1753 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "I am a music lover. I enjoy this app more than the others out there. I always have access to new music. I can fill up all of my playlists easily. I could listen to podcasts if I wanted too. It has everything that I need. I highly recommend it to everyone."
+
+[#10] Score: 0.1709 | ❌ FAIL
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "IT'S AMAZING AND YES THERE IS ADDS BUT NOT CONSTANTLY U DO HAVE TO PAY FOR PREMIUM SO U DON'T HAVE ADDS. BUT I REALLYYYYY RECOMMEND THIS AND NO MONEY NEEDS FOR SONGS ONLY FOR PREMIUM ( THAT I KNOW OF 😅) . BUT I TOTALLY RECOMMEND."
+
+================================================================================
+
+QUERY: "Why do users keep hearing the same songs?"
+================================================================================
+Query tokens: [keep, hear, same, song]
+
+Total results above threshold (0.3): 0
+>>> THRESHOLD TRIGGERED: Less than 3 reviews clear 0.3. "Not enough relevant reviews found" message will show on UI.
+
+[#1] Score: 0.2583 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "so many options. but after all these years shuffle options, still lets me hear the same song 10 times in the first 50 tracks of a 2500 track playlist. smart shuffle option does not change that."
+
+[#2] Score: 0.2577 | ❌ FAIL
+    Theme      : Repetitive Recommendations
+    Pain Point : General repetitiveness in recommendations
+    Raw Text   : "Title: Repeat Rating: 2 Stars  It always repeats the same songs, I skip & skip and it’s always the same. I search for new music but it always comes back to the same playlist."
+
+[#3] Score: 0.2243 | ❌ FAIL
+    Theme      : Repetitive Recommendations
+    Pain Point : General repetitiveness in recommendations
+    Raw Text   : "Title: Plays same songs over and over Rating: 1 Stars  App won’t stop playing the same songs over and over within your playlist."
+
+[#4] Score: 0.2233 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "fix your smart shuffle what's the point if it being there when it shuffles the same songs from the same artists and different songs from the same artists fix your smart shuffle please I can't enjoy music because of it please fix I'm begging you"
+
+[#5] Score: 0.2131 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "Absolute trash. New widget broke the already broken app more. Recommendations are always yhe exact same song (regardless of what you're listening to), the shuffle works the same way (only plays the same couple soungs). Its a free app for me and I still would rather listen to music on YouTube with commercials"
+
+[#6] Score: 0.1800 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "Title: YEYAAAAAA Rating: 5 Stars  Spotify is absolutely amazing and I love the special shuffle play where I can hear new song and expand my taste in music"
+
+[#7] Score: 0.1778 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "not sure why I have to pay for a premium account if the app is garbage. Most of the time the app will not even open, just a black screen. The shuffle literally only plays the same 20 songs on repeat in the same order. Terrible app design."
+
+[#8] Score: 0.1760 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "Spotify still don't understand shuffle. Repeating the same 30 songs out of 3000 does not constitute shuffle. It's understandable to not have proper random, but if I start playing from a song, it's not supposed to fall into the same set of songs every time. I've been using Spotify for 10 years, this problem has somehow only gotten worse."
+
+[#9] Score: 0.1724 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "shuffle system is broken, plays same song again. ps I'm a premium user."
+
+[#10] Score: 0.1694 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "The way you can manage your Playlists, the songs and plenty of library makes want to keep listening to music, podcasts and books!!"
+
+================================================================================
+
+QUERY: "How do users feel about playlist creation?"
+================================================================================
+Query tokens: [playlist, creat]
+
+Total results above threshold (0.3): 1
+>>> THRESHOLD TRIGGERED: Less than 3 reviews clear 0.3. "Not enough relevant reviews found" message will show on UI.
+
+[#1] Score: 0.3319 | ✅ PASS
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "Title: Quick & Easy Playlist Merge - No Hassle  Hey everyone, I've made something that some people would be interested in - Playlists → One - a web tool that aggregates all your Spotify playlists into one master playlist in no time.If you are anything like me, you most likely have zillions of playlists scattered around your account - gym playlists, chillout tracks, road trip songs - and at times it's just too much. That is why I created Playlists → One: so it is really easy to combine all those playlists without losing or changing anything.This is why I think you'll love it:It's all browser-based - no downloads, no installs, no fuss.It's safe and respectful with your music library: your own playlists stay just as you left them.The application asks for minimal permissions - only what it needs to access your playlists and create the combined one.Combining playlists is just a matter of logging in and pressing a button. No complicated process.The best part? It's completely free to use!I made it so that you could save time and just enjoy your music without the need to switch between playlists. Whether you're a casual listener or a fan of Spotify, I believe Playlists → One can simplify your music life.Check it out here: https://merger.queazified.co.uk/Give it a go, and let me know what you think! Your feedback will help me to make it better. Enjoy listening!  --- Community replies --- 1. Hi @Queazified It seems like your app is in Development Mode, and only up to 25 white-listed users can use your app now. You can read mor about this on this page. XimzendSpotify StarHelp others find this answer and click "Accept as Solution".If you appreciate my answer, maybe give me a Like.Note: I'm not a Spotify employee. 2. hey, i have a question! this seems really useful for organising playlists belonging to my girlfriend, but imagine, hypothetically, that she has over 40000 songs, and that one playlist can only hold a maximum of 20000 songs. will your app be aware of that and create the necessary playlists to handle this?"
+
+[#2] Score: 0.2611 | ❌ FAIL
+    Theme      : Algorithm Overfit
+    Pain Point : Liked songs bleed too heavily into new recommendations
+    Raw Text   : "Title: How to create a playlist with my recent liked songs?  I´d like to create playlist with the recently liked song of the past 2 months. I can listen just to the most recently added and not to my complete liked songs. An other option would to add a filter to the "liked songs" playlists. Thanks for any ideas!  --- Community replies --- 1. Hello @lamusical At the moment, there is no feature on the app that allows that kind of filtering but it would be convenient indeed so it may be a good step to put it out there in the Idea Submissions so that other users can hopefully back you up. There are also third-party apps that have similar features and one I personally use is IFTTT. It has a number of automated features and it creates playlists for songs you added to your library, a library per month. Just a small reminder though, the site is not affiliated with Spotify and connecting it to your account will be at your discretion. Take care TaylithSpotify StarHelp others find this answer and click "Accept as Solution".If you appreciate my answer, maybe give me a Like.Note: I'm not a Spotify employee. 2. Nice clear answer Taylith. Thanks for your info and the link. I didn't know of that link and will submit my idea there. Thanks again! 3. This is simple, I do it every 45 days (half and end of each quarter. I create 1 playlist for every quarter. Then I open liked songs and add recent songs into the corresponding playlist. When a quarter is finished, the corresponding playlist is completed. This is quite common, most of my friends do this. It takes only a few seconds to do it. 4. Thanks a lot! nice work around! I just did it and does the job! Thanks! I did added an idea to spotify (see early reply to my post) so one does not need to do this manually but it to be daily updated. So every day you have your last liked songs automatically of the last 2 months."
+
+[#3] Score: 0.2573 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "Title: Suggestion Rating: 5 Stars  When you search for a song in your playlists it should be able to take you to the song in the playlist and continue to play the rest of the playlist"
+
+[#4] Score: 0.2480 | ❌ FAIL
+    Theme      : Radio
+    Pain Point : Radio stations recycle liked songs instead of finding new artists
+    Raw Text   : "Love this app. So many great songs and Playlists. I love the fact that you can create your own personal radio stations based on the genre of music that you like 👍"
+
+[#5] Score: 0.2359 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "Title: Amazing Rating: 4 Stars  This app is amazing have good graphics it’s really good I am happy for finding this app I can create my own playlist is my favor part"
+
+[#6] Score: 0.2226 | ❌ FAIL
+    Theme      : Artist Discovery Bias
+    Pain Point : Algorithm pushes mainstream tracks over organic discoveries
+    Raw Text   : "Title: No Sagittarius Cosmic Playlist?  PlanDuo PremiumCountryUSADeviceiPhone 11 ProOperating SystemiOS 16.6.1 My Question or IssueWhy is there not a cosmic playlist for the astrological sign of Sagittarius?? I feel very left out and considering I pay for this monthly, I’d appreciate having one for all the fellow Sagittarius’s of the world.   --- Community replies --- 1. Hi there, Thanks for posting in the Community and welcome.No worries, we add new content, including new playlists every day, so if you can’t find this specific playlist, you might find it soon. There is usually a playlist for each zodiac sign, but this one might be being worked on, so we recommend checking later. In the meantime, you can find more playlists created by Spotify and other users. Some users have pointed this playlist to be the one you're looking for.If you have any questions or need anything else, the Community is here for you. Susan_GPModeratorHelp others find this answer and click "Accept as Solution".If you appreciate an answer, maybe give it a "Like".Are you new to the Community? Take a moment to introduce yourself! View solution in original post 2. Hi there, Thanks for posting in the Community and welcome.No worries, we add new content, including new playlists every day, so if you can’t find this specific playlist, you might find it soon. There is usually a playlist for each zodiac sign, but this one might be being worked on, so we recommend checking later. In the meantime, you can find more playlists created by Spotify and other users. Some users have pointed this playlist to be the one you're looking for.If you have any questions or need anything else, the Community is here for you. Susan_GPModeratorHelp others find this answer and click "Accept as Solution".If you appreciate an answer, maybe give it a "Like".Are you new to the Community? Take a moment to introduce yourself! 3. Cool and all but it is now 2024 and no updates have been made. 4. There are plenty of artist that can be on there like jay z, dj khaled, lil baby, Nicki, Brittney spears etc"
+
+[#7] Score: 0.2177 | ❌ FAIL
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "Title: New feature enables anyone to steal a mixed playlist  PlanPremiumCountryUKDeviceiMac My Question or IssueHi I want to discuss a new feature in mixed playlists that I discovered by accident. I discovered that someone can entirely duplicate someone else's playlist - with custom transitions included - by meddling with one of their transitions, then clicking Save.When you select save, it gives you the option to duplicate the entire playlist to your own library. I couldn't believe what I was seeing. I thought it must be a bug but apparently isn't. It feels completely wrong that playlist creators could put hours or even weeks into a playlist - with all the track selection and custom transitions - only for other people to be able to steal it and present it as their own work."
+
+[#8] Score: 0.2079 | ❌ FAIL
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "Title: playlist curators up rn Rating: 5 Stars  as a chronic playlist editor, love the new playlist editing features. please keep them forever 🥹"
+
+[#9] Score: 0.1931 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "why jump my playlists"
+
+[#10] Score: 0.1746 | ❌ FAIL
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "Title: Playlists not showing up even when set to "Public  I have a premium account and I just started having this issue... (I'm using the desktop version of Spotify on my MacBook Air)I make a playlist, add songs and a cover if needed then set it to playlist. But, it doesn't show up on my profile and other people can't see it too. I tried this with my other account and I had the same problem too. I also tried setting the playlist public on my phone and it shows up there but not on my desktop version. What's going on and how can I solve this? I'm someone who loves making playlists for others so this is quite annoying Update: I tried doing it on the Web player and it worked but it still didn't show up on my desktop version.   --- Community replies --- 1. Welcome to the Spotify Community, folks! Click on each section below for more details. Friends can't see the playlist you just shared with them? Spoiler (Highlight to read) It's possible that the playlist was reported and the system detected something unusual about it, so it made it visible only to you. I'd recommend checking your inbox for any recent emails from Spotify you may have received as there may be something in there which could give a bit more insight on the matter. If the issue persists, it's worth making a new playlist and copying the contents of the old one into it (you can do so from the three dots menu of the old playlist > Add to other playlist > New playlist). After that, you can add it to your profile and it should show up. <div class="lia-spoiler-noscript-container"><div class="lia-spoiler-noscript-content"> It's possible that the playlist was reported and the system detected something unusual about it, so it made it visible only to you. I'd recommend checking your inbox for any recent emails from Spotify you may have received as there may be something in there which could give a bit more insight on the matter. &nbsp; If the issue persists, it's worth making a new playlist and copying the contents of the old one into it (you can do so from the three dots menu of the old playlist &gt; Add to other playlist &gt; New playlist). After that, you can add it to your profile and it should show up. </div></div> Playlists not showing up on your profile? Spoiler (Highlight to read) Keep in mind that there's a limit of 200 playlists that can be shown on your profile so if you have more, that might be the reason not all of them are showing. Also, the public playlists on your profile are displayed in the Custom order you've set in the desktop app / Web Player. Any changes to the order of your public playlists will be reflected on your profile as well: In Your Library, set the filter to Playlists. Set the sort order to Custom order and rearrange your playlists as you see fit. <div class="lia-spoiler-noscript-container"><div class="lia-spoiler-noscript-content"> Keep in mind that there's a limit of 200 playlists that can be shown on your profile so if you have more, that might be the reason not all of them are showing. &nbsp; Also, the public playlists on your profile are displayed in the Custom order you've set in the desktop app / Web Player. Any changes to the order of your public playlists will be reflected on your profile as well: In Your Library, set the filter to Playlists. Set the sort order to Custom order and rearrange your playlists as you see fit. </div></div> Playlists not showing up in Search? Spoiler (Highlight to read)In case your playlist isn't showing up in Search, this is because not all search results are indexed. There are multiple factors that come to play in order for a playlist to show up in Search such as popularity, number of followers, uniqueness of name, etc. This post goes more in depth, so feel free to check it out for more info on the matter. For the time being, I recommend sharing the link directly with your friends.<div class="lia-spoiler-noscript-container"><div class="lia-spoiler-noscript-content">In case your playlist isn't showing up in Search, this is because not all search results are indexed.&nbsp;There are multiple factors that come to play in order for a playlist to show up in Search such as popularity, number of followers, uniqueness of name, etc.&nbsp;This post&nbsp;goes more in depth, so feel free to check it out for more info on the matter. For the time being, I recommend&nbsp;sharing the link&nbsp;directly with your friends.</div></div> Hope this clears things up. The Community is always here if there's anything else you need assistance with 2. Hey folks, Thanks for posting in the thread. It's worth mentioning that here the team is currently investigating the issue that public playlists are not visible on profiles and there's other users that are experiencing this. You can check out the ongoing issues thread, add your details there (as well as your vote) and subscribe to the thread in order not to miss any updates on the matter. Appreciate your cooperation! In the meantime, we're here if there's anything else we can assist you with. 3. Hey everyone, Thanks for reaching out on the Community! Keep in mind that there are 2 different ways to set your playlist visibility - by making playlists public or private, and by managing public playlists published to your Spotify profile. You can change the privacy settings for your playlist at any time by clicking the 3 dots > Make private/Make public. When you make a playlist private, nobody can access it, even if they have a link to it or search for it by name. For the playlists to also be visible to other users who visits your profile, you'll also need to add it to your profile. You can do so by clicking the 3 dots > Add to profile. Note that only public playlists can be published to your Spotify profile. If you've made sure that all those setting are correct and you still have this issue, we recommend clearing stored cache on your device(s), and signing out from the app & back in again once it's done. Completing these steps should resync you account info. We're just a post away if there's anything else you need assistance with. MariaModeratorHelp others find this answer and click "Accept as Solution".If you appreciate an answer, maybe give it a "Like".Are you new to the Community? Take a moment to introduce yourself! View solution in original post 4. Welcome to the Spotify Community, folks! Click on each section below for more details. Friends can't see the playlist you just shared with them? Spoiler (Highlight to read) It's possible that the playlist was reported and the system detected something unusual about it, so it made it visible only to you. I'd recommend checking your inbox for any recent emails from Spotify you may have received as there may be something in there which could give a bit more insight on the matter. If the issue persists, it's worth making a new playlist and copying the contents of the old one into it (you can do so from the three dots menu of the old playlist > Add to other playlist > New playlist). After that, you can add it to your profile and it should show up. <div class="lia-spoiler-noscript-container"><div class="lia-spoiler-noscript-content"> It's possible that the playlist was reported and the system detected something unusual about it, so it made it visible only to you. I'd recommend checking your inbox for any recent emails from Spotify you may have received as there may be something in there which could give a bit more insight on the matter. &nbsp; If the issue persists, it's worth making a new playlist and copying the contents of the old one into it (you can do so from the three dots menu of the old playlist &gt; Add to other playlist &gt; New playlist). After that, you can add it to your profile and it should show up. </div></div> Playlists not showing up on your profile? Spoiler (Highlight to read) Keep in mind that there's a limit of 200 playlists that can be shown on your profile so if you have more, that might be the reason not all of them are showing. Also, the public playlists on your profile are displayed in the Custom order you've set in the desktop app / Web Player. Any changes to the order of your public playlists will be reflected on your profile as well: In Your Library, set the filter to Playlists. Set the sort order to Custom order and rearrange your playlists as you see fit. <div class="lia-spoiler-noscript-container"><div class="lia-spoiler-noscript-content"> Keep in mind that there's a limit of 200 playlists that can be shown on your profile so if you have more, that might be the reason not all of them are showing. &nbsp; Also, the public playlists on your profile are displayed in the Custom order you've set in the desktop app / Web Player. Any changes to the order of your public playlists will be reflected on your profile as well: In Your Library, set the filter to Playlists. Set the sort order to Custom order and rearrange your playlists as you see fit. </div></div> Playlists not showing up in Search? Spoiler (Highlight to read)In case your playlist isn't showing up in Search, this is because not all search results are indexed. There are multiple factors that come to play in order for a playlist to show up in Search such as popularity, number of followers, uniqueness of name, etc. This post goes more in depth, so feel free to check it out for more info on the matter. For the time being, I recommend sharing the link directly with your friends.<div class="lia-spoiler-noscript-container"><div class="lia-spoiler-noscript-content">In case your playlist isn't showing up in Search, this is because not all search results are indexed.&nbsp;There are multiple factors that come to play in order for a playlist to show up in Search such as popularity, number of followers, uniqueness of name, etc.&nbsp;This post&nbsp;goes more in depth, so feel free to check it out for more info on the matter. For the time being, I recommend&nbsp;sharing the link&nbsp;directly with your friends.</div></div> Hope this clears things up. The Community is always here if there's anything else you need assistance with YordanModeratorHelp others find this answer and click "Accept as Solution". What are Solutions exactly?If you appreciate an answer, maybe give it a "Like".Are you new to the Community? Take a moment to introduce yourself! View solution in original post"
+
+================================================================================
+
+
+
+####################################################################################################
+
+=== EXPANDED STOPWORDS (hear/listening/keep/etc) ===
+
+QUERY: "What's wrong with podcast recommendations?"
+================================================================================
+Query tokens: [wrong, podcast, recommend]
+
+Total results above threshold (0.3): 1
+>>> THRESHOLD TRIGGERED: Less than 3 reviews clear 0.3. "Not enough relevant reviews found" message will show on UI.
+
+[#1] Score: 0.3977 | ✅ PASS
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "love the podcast on this app"
+
+[#2] Score: 0.2434 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "ads with premium?!!! I have a premium subscription, yet for some strange reason I started getting ads?!! why??? no ads on songs but with podcasts. some ads are within the podcast itself, so ok. but yesterday I had ads before the podcast..Spotify ads not related to the podcast. what is going on??"
+
+[#3] Score: 0.2392 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Title: How to remove and stop past podcasts from being recommended  Last year I was searching for some podcasts of specific interest but after giving a couple shows a try and not liking what I found I gave up and moved on. Now both of these podcasts are not only looming in my "Your Shows" despite having never followed them in the first place I am also getting notifications when new episodes are posted. I'm not following either, I never clicked like, and I'm sick of seeing them every time I open the app I pay for. How do you remove or block these shows so I never have to see them again?   --- Community replies --- 1. Hey folks, What I'd recommend is to look for the podcast in the Podcasts tab of your Home feed on the mobile app and tap the three dots on an episode > Not interested. Go to "Home" and select "Podcasts & Shows" at the top Find a podcast episode, tap the three dots menu and select "Not interested" Below are a few podcast- and customization-related ideas, which I think you'd like, so feel free to check them out and show your support by giving them a thumbs up: [Mobile][Other] Remove or manage “Your top podcasts” from mobile home screen [All Platforms] Customize Start Screen Take care. 2. Hey folks, What I'd recommend is to look for the podcast in the Podcasts tab of your Home feed on the mobile app and tap the three dots on an episode > Not interested. Go to "Home" and select "Podcasts & Shows" at the top Find a podcast episode, tap the three dots menu and select "Not interested" Below are a few podcast- and customization-related ideas, which I think you'd like, so feel free to check them out and show your support by giving them a thumbs up: [Mobile][Other] Remove or manage “Your top podcasts” from mobile home screen [All Platforms] Customize Start Screen Take care. YordanModeratorHelp others find this answer and click "Accept as Solution". What are Solutions exactly?If you appreciate an answer, maybe give it a "Like".Are you new to the Community? Take a moment to introduce yourself! View solution in original post 3. Hey @vin_sychem, Thank you for reaching out here in the Community. It's currently not possible to remove items from your Home screen, however, it seems like the Community folks have already created an Idea about being able to disable or hide podcasts entirely. If you'd like to see that option available, go ahead and check this idea here. While there's currently no way to customize your start screen, we'd suggest you give this idea a thumbs up, if this is something you'd like to see implemented in the future. Please note that even if an idea is currently set to “Not Right Now” you can still add your vote there as we revisit those ideas on regular intervals! If you're interested in how ideas work and how your feedback reaches the right teams here, check this page out. Hope this helps. If you ever have any other questions in the future, feel free to post in the Community again LyubkaModeratorHelp others find this answer and click "Accept as Solution".If you appreciate an answer, maybe give it a Like. 4. This is not true. The three dots only give you three choices; whether I wish to follow it, rate it, or share it. Even if you hit unfollow, the podcast won’t go away!! Frustrating"
+
+[#4] Score: 0.2363 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Title: Top Podcast Episodes Rating: 2 Stars  I want the top podcast episodes back"
+
+[#5] Score: 0.2226 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "It was amazing i recommend people to use this app"
+
+[#6] Score: 0.2163 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Title: Remove Recommand Podcast Channel from homepage  Hey, Can I give you some advice?I've played a podcast once, but I never followed it.Unfortunately, it sticks on my homepage and I cannot remove it.Can you add a feature to let me remove the podcast channel I'm not interested in?  --- Community replies --- 1. Hiya fam, To remove a podcast from your homepage on Spotify, you can try the following steps:Go to the "Podcasts" section of your Spotify app.Find the podcast that you want to remove from your homepage.Tap and hold on the podcast's icon or cover art until a menu appears.Select "Remove from Home" from the menu.The podcast should now be removed from your homepage.If the podcast still appears on your homepage after following these steps, try closing and reopening the Spotify app or logging out and back in to see if the changes have taken effect.I hope this helps, -Prague the Dog 2. Sorry, nothing appears when you press, long or short, title or cover art or icon . Three dots menu also have nothing in there. I have same problem as luckybastard 3. Exactly same problem. Solution suggested doesn't work (nothing appears as you press cover art or title) 4. Thanks for posting but this doesn't work for me on my Android ohone - when I hold the podcast icon no menu appears. Is there another way of removing them? This really should be an option."
+
+[#7] Score: 0.2138 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "best music app ever would recommend"
+
+[#8] Score: 0.1952 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "The recommendation system is fire 🔥🔥"
+
+[#9] Score: 0.1873 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Great app for listening to music and podcasts. Easy to use with a huge music library."
+
+[#10] Score: 0.1814 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "I am a music lover. I enjoy this app more than the others out there. I always have access to new music. I can fill up all of my playlists easily. I could listen to podcasts if I wanted too. It has everything that I need. I highly recommend it to everyone."
+
+================================================================================
+
+QUERY: "Why do users keep hearing the same songs?"
+================================================================================
+Query tokens: [same, song]
+
+Total results above threshold (0.3): 6
+>>> Normal display: Grounded AI answer will be generated using these reviews.
+
+[#1] Score: 0.4427 | ✅ PASS
+    Theme      : Repetitive Recommendations
+    Pain Point : General repetitiveness in recommendations
+    Raw Text   : "Title: Repeat Rating: 2 Stars  It always repeats the same songs, I skip & skip and it’s always the same. I search for new music but it always comes back to the same playlist."
+
+[#2] Score: 0.3853 | ✅ PASS
+    Theme      : Repetitive Recommendations
+    Pain Point : General repetitiveness in recommendations
+    Raw Text   : "Title: Plays same songs over and over Rating: 1 Stars  App won’t stop playing the same songs over and over within your playlist."
+
+[#3] Score: 0.3830 | ✅ PASS
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "fix your smart shuffle what's the point if it being there when it shuffles the same songs from the same artists and different songs from the same artists fix your smart shuffle please I can't enjoy music because of it please fix I'm begging you"
+
+[#4] Score: 0.3761 | ✅ PASS
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "Absolute trash. New widget broke the already broken app more. Recommendations are always yhe exact same song (regardless of what you're listening to), the shuffle works the same way (only plays the same couple soungs). Its a free app for me and I still would rather listen to music on YouTube with commercials"
+
+[#5] Score: 0.3149 | ✅ PASS
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "not sure why I have to pay for a premium account if the app is garbage. Most of the time the app will not even open, just a black screen. The shuffle literally only plays the same 20 songs on repeat in the same order. Terrible app design."
+
+[#6] Score: 0.3044 | ✅ PASS
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "Spotify still don't understand shuffle. Repeating the same 30 songs out of 3000 does not constitute shuffle. It's understandable to not have proper random, but if I start playing from a song, it's not supposed to fall into the same set of songs every time. I've been using Spotify for 10 years, this problem has somehow only gotten worse."
+
+[#7] Score: 0.2948 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "shuffle system is broken, plays same song again. ps I'm a premium user."
+
+[#8] Score: 0.2572 | ❌ FAIL
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "so many options. but after all these years shuffle options, still lets me hear the same song 10 times in the first 50 tracks of a 2500 track playlist. smart shuffle option does not change that."
+
+[#9] Score: 0.2464 | ❌ FAIL
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "I like the app but when I click a song it doesn't play the song I want"
+
+[#10] Score: 0.2299 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "I don't have premium but I get alot of ads, I get 2-4 adds after one song. I get the same ads over and over. But it's still a great app for listening to music on, there's plenty of podcasts to listen to, you can even make your own playlists and add any song to it! Still an amazing app!"
+
+================================================================================
+
+QUERY: "How do users feel about playlist creation?"
+================================================================================
+Query tokens: [playlist, creat]
+
+Total results above threshold (0.3): 1
+>>> THRESHOLD TRIGGERED: Less than 3 reviews clear 0.3. "Not enough relevant reviews found" message will show on UI.
+
+[#1] Score: 0.3343 | ✅ PASS
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "Title: Quick & Easy Playlist Merge - No Hassle  Hey everyone, I've made something that some people would be interested in - Playlists → One - a web tool that aggregates all your Spotify playlists into one master playlist in no time.If you are anything like me, you most likely have zillions of playlists scattered around your account - gym playlists, chillout tracks, road trip songs - and at times it's just too much. That is why I created Playlists → One: so it is really easy to combine all those playlists without losing or changing anything.This is why I think you'll love it:It's all browser-based - no downloads, no installs, no fuss.It's safe and respectful with your music library: your own playlists stay just as you left them.The application asks for minimal permissions - only what it needs to access your playlists and create the combined one.Combining playlists is just a matter of logging in and pressing a button. No complicated process.The best part? It's completely free to use!I made it so that you could save time and just enjoy your music without the need to switch between playlists. Whether you're a casual listener or a fan of Spotify, I believe Playlists → One can simplify your music life.Check it out here: https://merger.queazified.co.uk/Give it a go, and let me know what you think! Your feedback will help me to make it better. Enjoy listening!  --- Community replies --- 1. Hi @Queazified It seems like your app is in Development Mode, and only up to 25 white-listed users can use your app now. You can read mor about this on this page. XimzendSpotify StarHelp others find this answer and click "Accept as Solution".If you appreciate my answer, maybe give me a Like.Note: I'm not a Spotify employee. 2. hey, i have a question! this seems really useful for organising playlists belonging to my girlfriend, but imagine, hypothetically, that she has over 40000 songs, and that one playlist can only hold a maximum of 20000 songs. will your app be aware of that and create the necessary playlists to handle this?"
+
+[#2] Score: 0.2618 | ❌ FAIL
+    Theme      : Algorithm Overfit
+    Pain Point : Liked songs bleed too heavily into new recommendations
+    Raw Text   : "Title: How to create a playlist with my recent liked songs?  I´d like to create playlist with the recently liked song of the past 2 months. I can listen just to the most recently added and not to my complete liked songs. An other option would to add a filter to the "liked songs" playlists. Thanks for any ideas!  --- Community replies --- 1. Hello @lamusical At the moment, there is no feature on the app that allows that kind of filtering but it would be convenient indeed so it may be a good step to put it out there in the Idea Submissions so that other users can hopefully back you up. There are also third-party apps that have similar features and one I personally use is IFTTT. It has a number of automated features and it creates playlists for songs you added to your library, a library per month. Just a small reminder though, the site is not affiliated with Spotify and connecting it to your account will be at your discretion. Take care TaylithSpotify StarHelp others find this answer and click "Accept as Solution".If you appreciate my answer, maybe give me a Like.Note: I'm not a Spotify employee. 2. Nice clear answer Taylith. Thanks for your info and the link. I didn't know of that link and will submit my idea there. Thanks again! 3. This is simple, I do it every 45 days (half and end of each quarter. I create 1 playlist for every quarter. Then I open liked songs and add recent songs into the corresponding playlist. When a quarter is finished, the corresponding playlist is completed. This is quite common, most of my friends do this. It takes only a few seconds to do it. 4. Thanks a lot! nice work around! I just did it and does the job! Thanks! I did added an idea to spotify (see early reply to my post) so one does not need to do this manually but it to be daily updated. So every day you have your last liked songs automatically of the last 2 months."
+
+[#3] Score: 0.2573 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "Title: Suggestion Rating: 5 Stars  When you search for a song in your playlists it should be able to take you to the song in the playlist and continue to play the rest of the playlist"
+
+[#4] Score: 0.2510 | ❌ FAIL
+    Theme      : Radio
+    Pain Point : Radio stations recycle liked songs instead of finding new artists
+    Raw Text   : "Love this app. So many great songs and Playlists. I love the fact that you can create your own personal radio stations based on the genre of music that you like 👍"
+
+[#5] Score: 0.2407 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "Title: Amazing Rating: 4 Stars  This app is amazing have good graphics it’s really good I am happy for finding this app I can create my own playlist is my favor part"
+
+[#6] Score: 0.2228 | ❌ FAIL
+    Theme      : Artist Discovery Bias
+    Pain Point : Algorithm pushes mainstream tracks over organic discoveries
+    Raw Text   : "Title: No Sagittarius Cosmic Playlist?  PlanDuo PremiumCountryUSADeviceiPhone 11 ProOperating SystemiOS 16.6.1 My Question or IssueWhy is there not a cosmic playlist for the astrological sign of Sagittarius?? I feel very left out and considering I pay for this monthly, I’d appreciate having one for all the fellow Sagittarius’s of the world.   --- Community replies --- 1. Hi there, Thanks for posting in the Community and welcome.No worries, we add new content, including new playlists every day, so if you can’t find this specific playlist, you might find it soon. There is usually a playlist for each zodiac sign, but this one might be being worked on, so we recommend checking later. In the meantime, you can find more playlists created by Spotify and other users. Some users have pointed this playlist to be the one you're looking for.If you have any questions or need anything else, the Community is here for you. Susan_GPModeratorHelp others find this answer and click "Accept as Solution".If you appreciate an answer, maybe give it a "Like".Are you new to the Community? Take a moment to introduce yourself! View solution in original post 2. Hi there, Thanks for posting in the Community and welcome.No worries, we add new content, including new playlists every day, so if you can’t find this specific playlist, you might find it soon. There is usually a playlist for each zodiac sign, but this one might be being worked on, so we recommend checking later. In the meantime, you can find more playlists created by Spotify and other users. Some users have pointed this playlist to be the one you're looking for.If you have any questions or need anything else, the Community is here for you. Susan_GPModeratorHelp others find this answer and click "Accept as Solution".If you appreciate an answer, maybe give it a "Like".Are you new to the Community? Take a moment to introduce yourself! 3. Cool and all but it is now 2024 and no updates have been made. 4. There are plenty of artist that can be on there like jay z, dj khaled, lil baby, Nicki, Brittney spears etc"
+
+[#7] Score: 0.2177 | ❌ FAIL
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "Title: New feature enables anyone to steal a mixed playlist  PlanPremiumCountryUKDeviceiMac My Question or IssueHi I want to discuss a new feature in mixed playlists that I discovered by accident. I discovered that someone can entirely duplicate someone else's playlist - with custom transitions included - by meddling with one of their transitions, then clicking Save.When you select save, it gives you the option to duplicate the entire playlist to your own library. I couldn't believe what I was seeing. I thought it must be a bug but apparently isn't. It feels completely wrong that playlist creators could put hours or even weeks into a playlist - with all the track selection and custom transitions - only for other people to be able to steal it and present it as their own work."
+
+[#8] Score: 0.2114 | ❌ FAIL
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "Title: playlist curators up rn Rating: 5 Stars  as a chronic playlist editor, love the new playlist editing features. please keep them forever 🥹"
+
+[#9] Score: 0.1931 | ❌ FAIL
+    Theme      : Recommendation Quality
+    Pain Point : Recommendations don't match my actual taste
+    Raw Text   : "why jump my playlists"
+
+[#10] Score: 0.1778 | ❌ FAIL
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Title: Software issues not adressed for years Rating: 2 Stars  Spotify plays podcasts again right after finishing them.  There is no option of blocking content/creators (even temporarily)and podcasts/content I have no interest anymore appear in the auto-feed which cannot be influenced. No private mode in the app - when kids play their music (which might not be available in the Spotify kids version) it affects recommendations and playlists created by Spotify.  The issues above have been addressed online for years with Spotify not reacting or suggesting a complete account reset.  This is poor behalf and maintenance on Spotify‘s behalf and a switch to another provider might be the only alternative."
+
+================================================================================
+

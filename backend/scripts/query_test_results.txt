@@ -1,0 +1,97 @@
+=== Retrieval Quality Verification (Threshold: 0.28) ===
+
+QUERY: "What's wrong with podcast recommendations?"
+================================================================================
+Results found above threshold 0.28: 0
+>>> THRESHOLD TRIGGERED: Less than 3 reviews clear 0.28. "Not enough relevant reviews found" message will show on UI.
+
+(No reviews passed the 0.28 threshold)
+
+================================================================================
+
+QUERY: "Why do users keep hearing the same songs?"
+================================================================================
+Results found above threshold 0.28: 7
+>>> Normal display: Grounded AI answer will be generated using these reviews.
+
+[#1] Score: 0.4427
+    Theme      : Repetitive Recommendations
+    Pain Point : General repetitiveness in recommendations
+    Raw Text   : "Title: Repeat
+Rating: 2 Stars
+
+It always repeats the same songs, I skip & skip and it’s always the same. I search for new music but it always comes back to the same playlist."
+
+[#2] Score: 0.3853
+    Theme      : Repetitive Recommendations
+    Pain Point : General repetitiveness in recommendations
+    Raw Text   : "Title: Plays same songs over and over
+Rating: 1 Stars
+
+App won’t stop playing the same songs over and over within your playlist."
+
+[#3] Score: 0.3830
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "fix your smart shuffle what's the point if it being there when it shuffles the same songs from the same artists and different songs from the same artists fix your smart shuffle please I can't enjoy music because of it please fix I'm begging you"
+
+[#4] Score: 0.3761
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "Absolute trash. New widget broke the already broken app more. Recommendations are always yhe exact same song (regardless of what you're listening to), the shuffle works the same way (only plays the same couple soungs). Its a free app for me and I still would rather listen to music on YouTube with commercials"
+
+[#5] Score: 0.3149
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "not sure why I have to pay for a premium account if the app is garbage. Most of the time the app will not even open, just a black screen. The shuffle literally only plays the same 20 songs on repeat in the same order. Terrible app design."
+
+[#6] Score: 0.3044
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "Spotify still don't understand shuffle. Repeating the same 30 songs out of 3000 does not constitute shuffle. It's understandable to not have proper random, but if I start playing from a song, it's not supposed to fall into the same set of songs every time. I've been using Spotify for 10 years, this problem has somehow only gotten worse."
+
+[#7] Score: 0.2948
+    Theme      : Smart Shuffle
+    Pain Point : Smart Shuffle forces the same popular songs
+    Raw Text   : "shuffle system is broken, plays same song again. ps I'm a premium user."
+
+================================================================================
+
+QUERY: "How do users feel about playlist creation?"
+================================================================================
+Results found above threshold 0.28: 1
+>>> THRESHOLD TRIGGERED: Less than 3 reviews clear 0.28. "Not enough relevant reviews found" message will show on UI.
+
+[#1] Score: 0.3343
+    Theme      : Missing Features
+    Pain Point : Missing music discovery features
+    Raw Text   : "Title: Quick & Easy Playlist Merge - No Hassle
+
+Hey everyone, I've made something that some people would be interested in - Playlists → One - a web tool that aggregates all your Spotify playlists into one master playlist in no time.If you are anything like me, you most likely have zillions of playlists scattered around your account - gym playlists, chillout tracks, road trip songs - and at times it's just too much. That is why I created Playlists → One: so it is really easy to combine all those playlists without losing or changing anything.This is why I think you'll love it:It's all browser-based - no downloads, no installs, no fuss.It's safe and respectful with your music library: your own playlists stay just as you left them.The application asks for minimal permissions - only what it needs to access your playlists and create the combined one.Combining playlists is just a matter of logging in and pressing a button. No complicated process.The best part? It's completely free to use!I made it so that you could save time and just enjoy your music without the need to switch between playlists. Whether you're a casual listener or a fan of Spotify, I believe Playlists → One can simplify your music life.Check it out here: https://merger.queazified.co.uk/Give it a go, and let me know what you think! Your feedback will help me to make it better. Enjoy listening!
+
+--- Community replies ---
+1. Hi @Queazified It seems like your app is in Development Mode, and only up to 25 white-listed users can use your app now. You can read mor about this on this page. XimzendSpotify StarHelp others find this answer and click "Accept as Solution".If you appreciate my answer, maybe give me a Like.Note: I'm not a Spotify employee.
+2. hey, i have a question! this seems really useful for organising playlists belonging to my girlfriend, but imagine, hypothetically, that she has over 40000 songs, and that one playlist can only hold a maximum of 20000 songs. will your app be aware of that and create the necessary playlists to handle this?"
+
+================================================================================
+
+QUERY: "Are podcasts annoying users?"
+================================================================================
+Results found above threshold 0.28: 2
+>>> THRESHOLD TRIGGERED: Less than 3 reviews clear 0.28. "Not enough relevant reviews found" message will show on UI.
+
+[#1] Score: 0.3023
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "ads with premium?!!! I have a premium subscription, yet for some strange reason I started getting ads?!! why??? no ads on songs but with podcasts. some ads are within the podcast itself, so ok. but yesterday I had ads before the podcast..Spotify ads not related to the podcast. what is going on??"
+
+[#2] Score: 0.2935
+    Theme      : Podcasts
+    Pain Point : Podcasts clutter the music discovery feed
+    Raw Text   : "Title: Top Podcast Episodes
+Rating: 2 Stars
+
+I want the top podcast episodes back"
+
+================================================================================
+
