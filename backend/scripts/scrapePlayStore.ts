@@ -29,11 +29,12 @@ function sleep(ms: number) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-export async function scrapePlayStore(): Promise<ScrapedReview[]> {
+export async function scrapePlayStore(since?: Date): Promise<ScrapedReview[]> {
   const results: ScrapedReview[] = [];
   let nextPaginationToken: string | undefined = undefined;
 
   console.log('\n🤖 Scraping Google Play Store...');
+  const cutoffTime = since ? since.getTime() : CUTOFF_MS;
 
   for (let page = 0; page < MAX_PAGES; page++) {
     let reviews: any[];
@@ -65,7 +66,7 @@ export async function scrapePlayStore(): Promise<ScrapedReview[]> {
     for (const r of reviews) {
       const date = r.date ? new Date(r.date).getTime() : 0;
 
-      if (date > 0 && date < CUTOFF_MS) {
+      if (date > 0 && date <= cutoffTime) {
         hitCutoff = true;
         break;
       }
@@ -86,7 +87,7 @@ export async function scrapePlayStore(): Promise<ScrapedReview[]> {
     console.log(`  Page ${page + 1}: ${reviews.length} fetched, ${results.length} kept so far`);
 
     if (hitCutoff) {
-      console.log(`  ✓ Reached ${DAYS_BACK}-day cutoff at page ${page + 1}`);
+      console.log(`  ✓ Reached since cutoff at page ${page + 1}`);
       break;
     }
 

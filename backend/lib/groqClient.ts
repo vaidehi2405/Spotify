@@ -35,7 +35,7 @@ export async function callGroqAPI(prompt: string, systemPrompt: string, retries 
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt }
       ],
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.1-8b-instant',
       stream: false,
       temperature: 0,
     };

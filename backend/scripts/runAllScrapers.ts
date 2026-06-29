@@ -30,12 +30,30 @@ function sleep(ms: number) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-async function saveToLocalJSON(reviews: ScrapedReview[]): Promise<void> {
-  if (reviews.length === 0) return;
+async function saveToLocalJSON(newReviews: ScrapedReview[]): Promise<void> {
+  if (newReviews.length === 0) return;
   const filePath = resolve(process.cwd(), 'scraped_raw_reviews.json');
+  let existingReviews: ScrapedReview[] = [];
 
-  await fs.writeFile(filePath, JSON.stringify(reviews, null, 2), 'utf8');
-  console.log(`  [Local JSON] 💾 Overwrote and saved ${reviews.length} reviews to ${filePath}`);
+  try {
+    const rawData = await fs.readFile(filePath, 'utf8');
+    existingReviews = JSON.parse(rawData);
+  } catch (err) {
+    // Start with empty array if file does not exist
+  }
+
+  // Merge and deduplicate
+  const mergedMap = new Map<string, ScrapedReview>();
+  for (const r of existingReviews) {
+    mergedMap.set(r.external_id, r);
+  }
+  for (const r of newReviews) {
+    mergedMap.set(r.external_id, r);
+  }
+
+  const mergedList = Array.from(mergedMap.values());
+  await fs.writeFile(filePath, JSON.stringify(mergedList, null, 2), 'utf8');
+  console.log(`  [Local JSON] 💾 Saved ${newReviews.length} new reviews (total: ${mergedList.length}) to ${filePath}`);
 }
 
 async function upsertToSupabase(reviews: ScrapedReview[], label: string): Promise<number> {
@@ -64,6 +82,25 @@ async function upsertToSupabase(reviews: ScrapedReview[], label: string): Promis
   return saved;
 }
 
+export async function getLatestScrapedAt(source: string): Promise<Date | null> {
+  const { data, error } = await supabaseAdmin
+    .from('raw_reviews')
+    .select('scraped_at')
+    .eq('source', source)
+    .order('scraped_at', { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error(`  [${source}] Error fetching latest scraped_at:`, error.message);
+    return null;
+  }
+
+  if (data && data.length > 0 && data[0].scraped_at) {
+    return new Date(data[0].scraped_at);
+  }
+  return null;
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export async function runAllScrapers(): Promise<void> {
@@ -78,7 +115,9 @@ export async function runAllScrapers(): Promise<void> {
 
   // ── 1. Google Play Store ───────────────────────────────────────────────────
   try {
-    const reviews = await scrapePlayStore();
+    const since = await getLatestScrapedAt('Play Store');
+    console.log(`  [Play Store] Scraping reviews newer than: ${since ? since.toISOString() : '90 days cutoff'}`);
+    const reviews = await scrapePlayStore(since || undefined);
     allScraped.push(...reviews);
     const saved = await upsertToSupabase(reviews, 'Play Store');
     summary['Play Store'] = { scraped: reviews.length, saved };
@@ -91,7 +130,9 @@ export async function runAllScrapers(): Promise<void> {
 
   // ── 2. Apple App Store ─────────────────────────────────────────────────────
   try {
-    const reviews = await scrapeAppStore();
+    const since = await getLatestScrapedAt('App Store');
+    console.log(`  [App Store] Scraping reviews newer than: ${since ? since.toISOString() : '90 days cutoff'}`);
+    const reviews = await scrapeAppStore(since || undefined);
     allScraped.push(...reviews);
     const saved = await upsertToSupabase(reviews, 'App Store');
     summary['App Store'] = { scraped: reviews.length, saved };
@@ -104,7 +145,9 @@ export async function runAllScrapers(): Promise<void> {
 
   // ── 3. Spotify Community ───────────────────────────────────────────────────
   try {
-    const reviews = await scrapeSpotifyCommunity();
+    const since = await getLatestScrapedAt('Spotify Community');
+    console.log(`  [Spotify Community] Scraping threads newer than: ${since ? since.toISOString() : 'Beginning'}`);
+    const reviews = await scrapeSpotifyCommunity(since || undefined);
     allScraped.push(...reviews);
     const saved = await upsertToSupabase(reviews, 'Spotify Community');
     summary['Spotify Community'] = { scraped: reviews.length, saved };

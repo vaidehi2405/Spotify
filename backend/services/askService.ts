@@ -1,5 +1,6 @@
 import { getAllAnalyzedReviews, getAllRawReviews } from './reviewService';
 import { callGroqAPI } from '../lib/groqClient';
+import { normalizeSentimentFromText } from '../utils/sentiment';
 import { askAnswerSystemPrompt } from '../prompts/askAnswerPrompt';
 import { categorySelectionSystemPrompt } from '../prompts/categorySelectionPrompt';
 import { AskQuestionResponse } from '../types/ask';
@@ -170,6 +171,31 @@ function normalizeSelection(parsed: any, inventory: CategoryInventory): Category
   };
 }
 
+function isClearlyOffTopic(question: string): boolean {
+  const lower = question.toLowerCase().trim();
+  
+  // Truly off-topic keywords (e.g. weather, stocks, cooking/recipes, sports, bollywood)
+  const offTopicKeywords = [
+    'weather', 'stock market', 'stock price', 'sports score', 'cooking recipe', 
+    'bollywood trivia', 'how to cook', 'recipe for', 'cricket score', 
+    'football match', 'basketball game', 'who won the game', 'temperature today'
+  ];
+  
+  if (offTopicKeywords.some(keyword => lower.includes(keyword))) {
+    return true;
+  }
+  
+  // If the query is completely unrelated to music/audio/Spotify and has no broad research terms
+  const hasDiscoveryTerms = /spotify|music|song|track|artist|recommend|discovery|discover|playlist|shuffle|radio|podcast|mix|taste|vibe|weekly|daily|radar|dj/i.test(lower);
+  const hasBroadResearchTerms = /frustration|pain\s*point|problem|complaint|issue|increasing|trend|rising|what\s*are\s*users\s*saying|what\s*do\s*users\s*want|opportunity|need|improve/i.test(lower);
+  
+  if (!hasDiscoveryTerms && !hasBroadResearchTerms) {
+    return true;
+  }
+  
+  return false;
+}
+
 function isBroadReviewResearchQuestion(question: string): boolean {
   const lower = question.toLowerCase();
   const asksAboutNeedsOrPatterns =
@@ -180,14 +206,29 @@ function isBroadReviewResearchQuestion(question: string): boolean {
     lower.includes('patterns') ||
     lower.includes('themes') ||
     lower.includes('trends') ||
-    lower.includes('consistently');
+    lower.includes('consistently') ||
+    lower.includes('frustration') ||
+    lower.includes('pain point') ||
+    lower.includes('problem') ||
+    lower.includes('complaint') ||
+    lower.includes('issue') ||
+    lower.includes('increasing') ||
+    lower.includes('rising') ||
+    lower.includes('what are users saying') ||
+    lower.includes('what do users want') ||
+    lower.includes('opportunity') ||
+    lower.includes('needs') ||
+    lower.includes('improve');
   const pointsAtReviewCorpus =
     lower.includes('review') ||
     lower.includes('reviews') ||
     lower.includes('users') ||
-    lower.includes('feedback');
+    lower.includes('feedback') ||
+    lower.includes('spotify') ||
+    lower.includes('discover') ||
+    lower.includes('recommend');
 
-  return asksAboutNeedsOrPatterns && pointsAtReviewCorpus;
+  return asksAboutNeedsOrPatterns;
 }
 
 function broadSelectionFromInventory(inventory: CategoryInventory, rationale: string): CategorySelection {
@@ -200,14 +241,23 @@ function broadSelectionFromInventory(inventory: CategoryInventory, rationale: st
 }
 
 function rationaleExplicitlySpotifyDiscoveryRelated(rationale: string): boolean {
-  return /music discovery|recommendation|recommendations|playlist discovery|discover weekly|smart shuffle|release radar|daily mix|daily mixes|spotify radio|podcast.*discovery|discovery surface/i.test(rationale);
+  return /music|song|track|artist|recommend|discovery|discover|playlist|shuffle|radio|podcast|mix|taste|vibe/i.test(rationale);
 }
 
 export async function selectRelevantCategories(question: string, inventory: CategoryInventory): Promise<CategorySelection> {
+  if (isClearlyOffTopic(question)) {
+    return {
+      intent: 'off_topic',
+      selected_pain_points: [],
+      selected_themes: [],
+      rationale: 'The question is clearly off-topic and unrelated to Spotify music discovery or recommendations.'
+    };
+  }
+
   if (isBroadReviewResearchQuestion(question)) {
     return broadSelectionFromInventory(
       inventory,
-      'The question asks for broad unmet needs or patterns across the existing Spotify review corpus.'
+      'The question is a broad Spotify discovery research or frustration question.'
     );
   }
 
@@ -233,9 +283,18 @@ ${inventory.themes.map(c => `- ${c.name} (${c.count})`).join('\n')}`;
       return { ...selection, intent: 'off_topic', selected_pain_points: [], selected_themes: [] };
     }
 
+    if (selection.intent === 'off_topic' || selection.selected_pain_points.length === 0) {
+      if (!isClearlyOffTopic(question)) {
+        return broadSelectionFromInventory(inventory, 'Recovered from off_topic classification for a topic that is not clearly off-topic.');
+      }
+    }
+
     return selection;
   } catch (err: any) {
     console.warn('[askService] Failed to select categories:', err.message);
+    if (!isClearlyOffTopic(question)) {
+      return broadSelectionFromInventory(inventory, 'Category selection failed but query is relevant.');
+    }
     return { intent: 'off_topic', selected_pain_points: [], selected_themes: [], rationale: 'Category selection failed.' };
   }
 }
@@ -248,10 +307,43 @@ function compareReviewsForSampling(a: AnalyzedReview, b: AnalyzedReview): number
     || (a.created_at || '').localeCompare(b.created_at || '');
 }
 
+const PRIORITIZED_PAIN_POINTS = new Set([
+  "Recommendations don't match my actual taste",
+  "General repetitiveness in recommendations",
+  "Recommendations are too repetitive",
+  "Smart Shuffle forces the same popular songs",
+  "Discover Weekly repeats songs I already know",
+  "Daily Mixes have too much overlap or repeat tracks",
+  "Radio stations recycle liked songs instead of finding new artists",
+  "Podcasts clutter the music discovery feed",
+  "Algorithm pushes mainstream tracks over organic discoveries",
+  "Recommendations ignore my actual playlist vibe",
+  "Lack of control over how adventurous recommendations are",
+  "Release Radar misses indie artists I follow",
+  "Recommendations got worse over time",
+  "Temporary listening habits ruin taste profile"
+]);
+
+const PRIORITIZED_THEMES = new Set([
+  "Recommendation Quality",
+  "Repetitive Recommendations",
+  "Smart Shuffle",
+  "Discover Weekly",
+  "Daily Mix",
+  "Radio",
+  "Podcast Clutter",
+  "Mainstream Bias",
+  "Playlist Discovery",
+  "Mood Mismatch",
+  "Taste Profile",
+  "Artist Discovery Bias"
+]);
+
 export function retrieveReviewsByCategories(
   selection: CategorySelection,
   analyzedReviews: AnalyzedReview[],
   rawReviews: RawReview[],
+  question: string,
   limit = selection.intent === 'broad' ? 36 : 12
 ): CategoryRetrievedReview[] {
   if (selection.intent === 'off_topic' || selection.selected_pain_points.length === 0) return [];
@@ -259,15 +351,50 @@ export function retrieveReviewsByCategories(
   const rawMap = new Map<string, RawReview>();
   for (const raw of rawReviews) rawMap.set(raw.id, raw);
 
+  // Compute TF-IDF score map for the query
+  const scoredList = retrieveRelevantReviews(question, analyzedReviews, rawReviews, analyzedReviews.length, selection.intent === 'broad');
+  const scoreMap = new Map<string, number>();
+  for (const item of scoredList) {
+    scoreMap.set(item.analyzed.raw_review_id, item.score);
+  }
+
   const selectedPainPoints = new Set(selection.selected_pain_points);
   const selectedThemes = new Set(selection.selected_themes);
+
+  const isPositiveQuery = /like|love|good|great|positive|enjoy|best|favorite|benefit|pros|happy/i.test(question);
+
   const matched = analyzedReviews
     .filter(review => isRelevantCategory(review.pain_point))
-    .filter(review => selectedPainPoints.has(review.pain_point || '') || selectedThemes.has(review.theme || ''));
+    .filter(review => {
+      const rawReview = rawMap.get(review.raw_review_id);
+      const rawText = rawReview?.review_text || '';
+      const dynamicSentiment = normalizeSentimentFromText(rawText, review.sentiment, rawReview?.rating);
+      // Exclude positive reviews for negative/neutral frustration questions
+      if (!isPositiveQuery && dynamicSentiment === 'positive') {
+        return false;
+      }
+      return true;
+    })
+    .filter(review => {
+      // Prioritize pain points if they are specified
+      if (selectedPainPoints.size > 0) {
+        return selectedPainPoints.has(review.pain_point || '');
+      }
+      return selectedThemes.has(review.theme || '');
+    });
+
+  const customCompare = (a: AnalyzedReview, b: AnalyzedReview) => {
+    const scoreA = scoreMap.get(a.raw_review_id) || 0;
+    const scoreB = scoreMap.get(b.raw_review_id) || 0;
+    if (Math.abs(scoreA - scoreB) > 0.0001) {
+      return scoreB - scoreA;
+    }
+    return compareReviewsForSampling(a, b);
+  };
 
   if (selection.intent !== 'broad') {
     return matched
-      .sort(compareReviewsForSampling)
+      .sort(customCompare)
       .slice(0, limit)
       .map(review => ({ analyzed: review, raw: rawMap.get(review.raw_review_id), category: review.pain_point || review.theme || 'Feedback' }));
   }
@@ -284,14 +411,14 @@ export function retrieveReviewsByCategories(
   const selected: AnalyzedReview[] = [];
 
   for (const category of categoryOrder) {
-    selected.push(...byCategory.get(category)!.sort(compareReviewsForSampling).slice(0, perCategory));
+    selected.push(...byCategory.get(category)!.sort(customCompare).slice(0, perCategory));
   }
 
   let cursor = 0;
   while (selected.length < limit && categoryOrder.length > 0) {
     let added = false;
     for (const category of categoryOrder) {
-      const reviews = byCategory.get(category)!.sort(compareReviewsForSampling);
+      const reviews = byCategory.get(category)!.sort(customCompare);
       const next = reviews[perCategory + cursor];
       if (next && !selected.includes(next)) {
         selected.push(next);
@@ -331,7 +458,8 @@ export function retrieveRelevantReviews(
   query: string,
   analyzedReviews: AnalyzedReview[],
   rawReviews: RawReview[],
-  limit = 10
+  limit = 10,
+  isBroad = false
 ): ScoredReview[] {
   // Build a lookup map for raw reviews by id for O(1) access
   const rawMap = new Map<string, RawReview>();
@@ -396,9 +524,9 @@ export function retrieveRelevantReviews(
     const raw = rawMap.get(r.raw_review_id);
     const reviewTokens = docTokens[index];
 
-    // If the query contains topic terms, the review must match at least one of them
+    // If the query contains topic terms, the review must match at least one of them (except in broad queries)
     let topicMatch = true;
-    if (queryTopics.length > 0) {
+    if (!isBroad && queryTopics.length > 0) {
       topicMatch = reviewTokens.some(t => queryTopics.includes(t));
     }
 
@@ -429,6 +557,13 @@ export function retrieveRelevantReviews(
       if (isComplaintQuery && isPositiveSentiment) {
         score *= 0.5;
       }
+
+      // Boost for prioritized themes/pain points
+      const hasPrioritizedPainPoint = r.pain_point && PRIORITIZED_PAIN_POINTS.has(r.pain_point);
+      const hasPrioritizedTheme = r.theme && PRIORITIZED_THEMES.has(r.theme);
+      if (hasPrioritizedPainPoint || hasPrioritizedTheme) {
+        score *= 1.5;
+      }
     }
 
     return {
@@ -438,8 +573,8 @@ export function retrieveRelevantReviews(
     };
   });
 
-  // Exclude reviews below cosine similarity threshold (0.28)
-  const threshold = 0.28;
+  // Exclude reviews below similarity threshold
+  const threshold = isBroad ? 0.05 : 0.28;
   const results = scoredReviews
     .filter(res => res.score >= threshold)
     .sort((a, b) => b.score - a.score)
@@ -476,7 +611,69 @@ User question: "${question}"`;
   }
 }
 
+function checkConversationalPhrases(question: string): (AskQuestionResponse & { debug?: AskDebugInfo }) | null {
+  const clean = question.trim().toLowerCase().replace(/[?!.,;:]/g, '').replace(/\s+/g, ' ');
+  
+  const greetings = new Set([
+    'hi', 'hello', 'hey', 'greetings', 'yo', 'hola', 'howdy', 'sup',
+    'hi there', 'hello there', 'hey there',
+    'good morning', 'good afternoon', 'good evening',
+    'how are you', 'how is it going', 'hows it going',
+    'whats up', 'what is up', 'whats new', 'what is new',
+    'hi discovery assistant', 'hello discovery assistant', 'hey discovery assistant'
+  ]);
+
+  const appreciation = new Set([
+    'thanks', 'thank you', 'thank you so much', 'appreciate it', 'thanks dynamic assistant',
+    'thanks assistant', 'thank you assistant'
+  ]);
+
+  const goodbyes = new Set([
+    'bye', 'goodbye', 'see you', 'see you later', 'talk to you later', 'farewell'
+  ]);
+
+  if (greetings.has(clean)) {
+    return {
+      answer: "Hello! I am your Spotify Discovery Assistant. How can I help you analyze user reviews and feedback today?",
+      answer_points: [],
+      source_counts: getEmptySourceCounts(),
+      supporting_reviews: [],
+    };
+  }
+
+  if (appreciation.has(clean)) {
+    return {
+      answer: "You're very welcome! Let me know if you have any other questions or need further analysis on the Spotify reviews.",
+      answer_points: [],
+      source_counts: getEmptySourceCounts(),
+      supporting_reviews: [],
+    };
+  }
+
+  if (goodbyes.has(clean)) {
+    return {
+      answer: "Goodbye! Have a great day, and feel free to reach out whenever you want to analyze more reviews.",
+      answer_points: [],
+      source_counts: getEmptySourceCounts(),
+      supporting_reviews: [],
+    };
+  }
+
+  return null;
+}
+
 export async function answerQuestion(question: string): Promise<AskQuestionResponse & { debug?: AskDebugInfo }> {
+  const conversational = checkConversationalPhrases(question);
+  if (conversational) {
+    await supabaseAdmin.from('question_logs').insert([{
+      question,
+      answer: conversational.answer,
+      source_counts: conversational.source_counts,
+      supporting_review_ids: []
+    }]);
+    return conversational;
+  }
+
   const analyzedReviews = await getAllAnalyzedReviews();
   const rawReviews = await getAllRawReviews();
   const inventory = buildCategoryInventory(analyzedReviews);
@@ -503,7 +700,17 @@ export async function answerQuestion(question: string): Promise<AskQuestionRespo
     };
   }
 
-  const retrieved = retrieveReviewsByCategories(selection, analyzedReviews, rawReviews);
+  let searchQuery = question;
+  if (selection.intent === 'broad') {
+    searchQuery = `${question} Spotify discovery pain points, recommendation frustrations, repetitive songs, stale recommendations, Smart Shuffle issues, Discover Weekly complaints, playlist discovery problems, mainstream recommendations, mood mismatch, podcast clutter.`;
+  } else {
+    const expanded = await expandQuery(question);
+    if (expanded) {
+      searchQuery = `${question}, ${expanded}`;
+    }
+  }
+
+  const retrieved = retrieveReviewsByCategories(selection, analyzedReviews, rawReviews, searchQuery);
 
   if (retrieved.length === 0) {
     const answer = "I found a Spotify-related question, but I don't have enough classified review evidence in the current dataset to answer it reliably. Try asking about recommendations, Smart Shuffle, Discover Weekly, podcasts, playlist discovery, or other music discovery topics.";

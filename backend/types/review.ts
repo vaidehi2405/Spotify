@@ -6,6 +6,7 @@ export interface RawReview {
   rating: number | null;
   review_url: string | null;
   posted_at: string | null;
+  external_id?: string;
   created_at?: string;
 }
 

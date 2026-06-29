@@ -5,6 +5,9 @@ export interface ScrapeState {
   totalPending: number;
   classifiedCount: number;
   error: string | null;
+  estimatedDuration?: number | null;
+  estimatedTimeRemaining?: number | null;
+  cancelled: boolean;
 }
 
 export const scrapeState: ScrapeState = {
@@ -14,4 +17,7 @@ export const scrapeState: ScrapeState = {
   totalPending: 0,
   classifiedCount: 0,
   error: null,
+  estimatedDuration: null,
+  estimatedTimeRemaining: null,
+  cancelled: false,
 };

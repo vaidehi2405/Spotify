@@ -10,7 +10,7 @@ dotenv.config({ path: resolve(process.cwd(), '.env.local') });
 import { answerQuestion } from '../services/askService';
 import { generateAnalysisSummary, reanalyzeReviewsFromFile, importClassifiedReviews } from '../services/analysisService';
 import { AskQuestionRequest } from '../types/ask';
-import { runAllScrapers } from '../scripts/runAllScrapers';
+import { runAllScrapers, getLatestScrapedAt } from '../scripts/runAllScrapers';
 import { scrapeState } from '../services/scrapeState';
 
 const app = express();
@@ -35,25 +35,55 @@ async function runScrapingPipeline(source = 'scheduler') {
   scrapeState.totalPending = 0;
   scrapeState.error = null;
   scrapeState.lastScrapedAt = lastScrapedAt;
+  scrapeState.estimatedDuration = null;
+  scrapeState.estimatedTimeRemaining = null;
+  scrapeState.cancelled = false;
 
   console.log(`\n[Pipeline] 🚀 Starting integrated pipeline (triggered by: ${source}) at ${new Date().toISOString()}`);
 
-  // Set up a global timeout of 10 minutes to reset the state if it gets stuck
+  // Set up a global timeout of 3 hours — signals cancellation instead of
+  // resetting state directly, so the classification loop can exit gracefully
+  // and the pipeline's finally{} block handles cleanup.
   const timeoutId = setTimeout(() => {
     if (isScraping) {
-      console.error('[Pipeline] ❌ Pipeline timed out after 10 minutes!');
-      isScraping = false;
-      scrapeState.isScraping = false;
-      scrapeState.stage = 'idle';
-      scrapeState.error = 'Scraping pipeline timed out after 10 minutes.';
+      console.error('[Pipeline] ❌ Pipeline timed out after 3 hours! Requesting cancellation...');
+      scrapeState.cancelled = true;
+      scrapeState.error = 'Scraping pipeline timed out after 3 hours.';
     }
-  }, 10 * 60 * 1000);
+  }, 3 * 60 * 60 * 1000);
+
+  let scrapeTimer: NodeJS.Timeout | null = null;
 
   try {
     // 1. Scrape real-time reviews to scraped_raw_reviews.json
     console.log('[Pipeline] Step 1: Scraping reviews...');
     scrapeState.stage = 'scraping';
+
+    // Calculate dynamic scraping estimate based on last scrape dates
+    const sincePlay = await getLatestScrapedAt('Play Store');
+    const sinceApp = await getLatestScrapedAt('App Store');
+    const sinceComm = await getLatestScrapedAt('Spotify Community');
+    const isIncremental = sincePlay && sinceApp && sinceComm && (Date.now() - sincePlay.getTime() < 24 * 60 * 60 * 1000);
+    const scrapeEstimate = isIncremental ? 15 : 60; // 15s for incremental, 60s for full
+    scrapeState.estimatedDuration = scrapeEstimate;
+    scrapeState.estimatedTimeRemaining = scrapeEstimate;
+    const scrapeStartedAt = Date.now();
+
+    scrapeTimer = setInterval(() => {
+      if (scrapeState.stage === 'scraping') {
+        const elapsed = Math.round((Date.now() - scrapeStartedAt) / 1000);
+        scrapeState.estimatedTimeRemaining = Math.max(1, scrapeEstimate - elapsed);
+      } else {
+        if (scrapeTimer) clearInterval(scrapeTimer);
+      }
+    }, 1000);
+
     await runAllScrapers();
+
+    if (scrapeTimer) {
+      clearInterval(scrapeTimer);
+      scrapeTimer = null;
+    }
     
     // 2. Classify raw reviews using LLM to classified_reviews.json
     console.log('[Pipeline] Step 2: Classifying reviews using LLM...');
@@ -63,19 +93,38 @@ async function runScrapingPipeline(source = 'scheduler') {
     // 3. Import classified reviews to Database to update dashboard
     console.log('[Pipeline] Step 3: Importing classifications to Database...');
     scrapeState.stage = 'importing';
+    scrapeState.estimatedDuration = 3;
+    scrapeState.estimatedTimeRemaining = 3;
+    const importStartedAt = Date.now();
+    const importTimer = setInterval(() => {
+      if (scrapeState.stage === 'importing') {
+        const elapsed = Math.round((Date.now() - importStartedAt) / 1000);
+        scrapeState.estimatedTimeRemaining = Math.max(1, 3 - elapsed);
+      } else {
+        clearInterval(importTimer);
+      }
+    }, 1000);
+
     await importClassifiedReviews();
+
+    clearInterval(importTimer);
 
     lastScrapedAt = new Date();
     scrapeState.lastScrapedAt = lastScrapedAt;
     scrapeState.stage = 'idle';
+    scrapeState.estimatedDuration = null;
+    scrapeState.estimatedTimeRemaining = null;
     console.log(`[Pipeline] ✅ End-to-end pipeline finished successfully at ${lastScrapedAt.toISOString()}`);
   } catch (err: any) {
     console.error(`[Pipeline] ✗ Pipeline Error: ${err.message}`);
     scrapeState.error = err.message || 'Scraping pipeline failed.';
     scrapeState.stage = 'idle';
+    scrapeState.estimatedDuration = null;
+    scrapeState.estimatedTimeRemaining = null;
   } finally {
     isScraping = false;
     scrapeState.isScraping = false;
+    if (scrapeTimer) clearInterval(scrapeTimer);
     clearTimeout(timeoutId);
   }
 }

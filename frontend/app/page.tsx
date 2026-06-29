@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import AskView from '../components/AskView';
+import AskView, { ChatTurn } from '../components/AskView';
 import DashboardView from '../components/DashboardView';
 import { AnalysisSummary } from '../types/analysis';
 
@@ -11,12 +11,14 @@ export default function Home() {
   const [summary, setSummary] = useState<AnalysisSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatTurn[]>([]);
 
   // Fetch summary data
   const fetchData = async () => {
     try {
       setLoading(true);
-      const summaryRes = await fetch(`http://localhost:4000/api/analysis-summary?t=${Date.now()}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const summaryRes = await fetch(`${apiUrl}/api/analysis-summary?t=${Date.now()}`, {
         cache: 'no-store',
       });
       const summaryData = await summaryRes.json();
@@ -43,7 +45,11 @@ export default function Home() {
       
       <main className="flex-grow h-full overflow-hidden">
         {activeTab === 'ask' ? (
-          <AskView />
+          <AskView 
+            history={chatHistory} 
+            onHistoryChange={setChatHistory} 
+            onClearHistory={() => setChatHistory([])}
+          />
         ) : (
           <DashboardView summary={summary} loading={loading} onRefreshComplete={fetchData} />
         )}

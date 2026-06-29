@@ -21,13 +21,14 @@ function sleep(ms: number) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-export async function scrapeAppStore(): Promise<ScrapedReview[]> {
+export async function scrapeAppStore(since?: Date): Promise<ScrapedReview[]> {
   const results: ScrapedReview[] = [];
   const countries = ['us', 'nz', 'my', 'ie'];
   const targetFetchedReviews = 200;
   let fetchedCount = 0;
 
   console.log('\n🍎 Scraping Apple App Store (Multiple Countries)...');
+  const cutoffTime = since ? since.getTime() : (Date.now() - 90 * 24 * 60 * 60 * 1000);
 
   for (const country of countries) {
     if (fetchedCount >= targetFetchedReviews) break;
@@ -57,10 +58,15 @@ export async function scrapeAppStore(): Promise<ScrapedReview[]> {
         continue;
       }
 
-      countryFetched += reviews.length;
-      fetchedCount += reviews.length;
+      let hitCutoff = false;
 
       for (const r of reviews) {
+        const date = r.date ? new Date(r.date).getTime() : 0;
+        if (date > 0 && date <= cutoffTime) {
+          hitCutoff = true;
+          break;
+        }
+
         const title = (r.title || '').trim();
         const body = (r.text || '').trim();
         const rating = r.score;
@@ -77,7 +83,16 @@ export async function scrapeAppStore(): Promise<ScrapedReview[]> {
         });
       }
 
+      countryFetched += reviews.length;
+      fetchedCount += reviews.length;
+
       console.log(`    Page ${page}: ${reviews.length} fetched (country total: ${countryFetched})`);
+
+      if (hitCutoff) {
+        console.log(`    ✓ Reached since cutoff for country ${country.toUpperCase()}`);
+        break;
+      }
+
       page++;
       await sleep(1000);
     }

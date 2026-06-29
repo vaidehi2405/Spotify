@@ -27,6 +27,7 @@ interface DashboardViewProps {
 }
 
 export default function DashboardView({ summary, loading, onRefreshComplete }: DashboardViewProps) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   const [refreshing, setRefreshing] = useState(false);
   const [refreshStatus, setRefreshStatus] = useState<string>('');
   const [scrapeDetails, setScrapeDetails] = useState<any>(null);
@@ -73,7 +74,7 @@ export default function DashboardView({ summary, loading, onRefreshComplete }: D
     
     const checkInitialStatus = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/scrape/status?t=${Date.now()}`, {
+        const res = await fetch(`${apiUrl}/api/scrape/status?t=${Date.now()}`, {
           cache: 'no-store',
         });
         const data = await res.json();
@@ -84,7 +85,7 @@ export default function DashboardView({ summary, loading, onRefreshComplete }: D
           
           pollInterval = setInterval(async () => {
             try {
-              const statusRes = await fetch(`http://localhost:4000/api/scrape/status?t=${Date.now()}`, {
+              const statusRes = await fetch(`${apiUrl}/api/scrape/status?t=${Date.now()}`, {
                 cache: 'no-store',
               });
               const statusData = await statusRes.json();
@@ -127,7 +128,7 @@ export default function DashboardView({ summary, loading, onRefreshComplete }: D
       setRefreshStatus('Starting scraper...');
       setScrapeDetails({ stage: 'scraping', classifiedCount: 0, totalPending: 0 });
       
-      const res = await fetch('http://localhost:4000/api/scrape', {
+      const res = await fetch(`${apiUrl}/api/scrape`, {
         method: 'POST',
       });
       const data = await res.json();
@@ -139,7 +140,7 @@ export default function DashboardView({ summary, loading, onRefreshComplete }: D
       
       const pollInterval = setInterval(async () => {
         try {
-          const statusRes = await fetch(`http://localhost:4000/api/scrape/status?t=${Date.now()}`, {
+          const statusRes = await fetch(`${apiUrl}/api/scrape/status?t=${Date.now()}`, {
             cache: 'no-store',
           });
           const statusData = await statusRes.json();
@@ -187,10 +188,14 @@ export default function DashboardView({ summary, loading, onRefreshComplete }: D
     );
   }
 
-  // Format date to something like "May 18, 2026"
-  const lastUpdated = new Date().toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric'
-  });
+  // Format date to something like "May 18, 2026, 04:30 PM"
+  const lastUpdated = summary && summary.lastScrapedAt
+    ? new Date(summary.lastScrapedAt).toLocaleString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      })
+    : new Date().toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
 
   const maxPainPointCount = summary.topPainPoints.length > 0 ? summary.topPainPoints[0].count : 1;
 
@@ -277,9 +282,17 @@ export default function DashboardView({ summary, loading, onRefreshComplete }: D
             {/* Context/status line */}
             <div className="flex justify-between items-center text-[10px] text-muted">
               <span>Status: <span className="font-bold text-spotify">{scrapeDetails.stage.toUpperCase()}</span></span>
-              {scrapeDetails.stage === 'scraping' && <span>Fetching playstore, appstore & community feeds...</span>}
-              {scrapeDetails.stage === 'classifying' && <span>Rate-limit batching active (2s delay per 10 reviews)</span>}
-              {scrapeDetails.stage === 'importing' && <span>Upserting records to Supabase storage...</span>}
+              {scrapeDetails.estimatedTimeRemaining !== undefined && scrapeDetails.estimatedTimeRemaining !== null && scrapeDetails.estimatedTimeRemaining > 0 ? (
+                <span className="flex items-center gap-1">
+                  Est. time remaining: <span className="font-semibold text-foreground bg-sidebar-border px-1.5 py-0.5 rounded font-mono">{scrapeDetails.estimatedTimeRemaining}s</span>
+                </span>
+              ) : (
+                <>
+                  {scrapeDetails.stage === 'scraping' && <span>Fetching playstore, appstore & community feeds...</span>}
+                  {scrapeDetails.stage === 'classifying' && <span>Rate-limit batching active (2s delay per 10 reviews)</span>}
+                  {scrapeDetails.stage === 'importing' && <span>Upserting records to Supabase storage...</span>}
+                </>
+              )}
             </div>
           </div>
         )}
@@ -308,22 +321,24 @@ export default function DashboardView({ summary, loading, onRefreshComplete }: D
         <div className="bg-card border border-card-border rounded-xl p-6 shadow-sm">
           <h2 className="text-base font-bold mb-6">Top Pain Points</h2>
           
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-6">
             {summary.topPainPoints.length > 0 ? (
               summary.topPainPoints.map((pp, idx) => (
-                <div key={idx} className="flex items-center gap-4">
-                  <span className="text-sm font-medium w-1/3 truncate" title={pp.name}>
-                    {pp.name}
-                  </span>
-                  <div className="flex-grow flex items-center h-2 bg-sidebar-border rounded-full overflow-hidden">
+                <div key={idx} className="flex flex-col gap-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-sm font-medium text-foreground leading-snug" title={pp.name}>
+                      {pp.name}
+                    </span>
+                    <span className="text-xs text-muted font-medium whitespace-nowrap pt-0.5 tabular-nums">
+                      {pp.count} ({pp.percentage}%)
+                    </span>
+                  </div>
+                  <div className="w-full flex items-center h-2 bg-sidebar-border rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-spotify transition-all duration-1000 ease-out" 
                       style={{ width: `${Math.max((pp.count / maxPainPointCount) * 100, 2)}%` }}
                     />
                   </div>
-                  <span className="text-xs text-muted w-24 text-right tabular-nums">
-                    {pp.count} ({pp.percentage}%)
-                  </span>
                 </div>
               ))
             ) : (
@@ -332,7 +347,6 @@ export default function DashboardView({ summary, loading, onRefreshComplete }: D
           </div>
         </div>
 
-        {/* Top User Needs */}
         <div className="bg-card border border-card-border rounded-xl p-6 shadow-sm flex flex-col h-full">
           <h2 className="text-base font-bold mb-6">Top User Needs</h2>
           

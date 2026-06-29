@@ -167,6 +167,15 @@ export async function reanalyzeMockClassifiedReviews(): Promise<number> {
 
   console.log('Re-running first-pass Groq analysis on these reviews...\n');
 
+  const classifiedPath = resolve(process.cwd(), 'classified_reviews.json');
+  let classifiedReviews: any[] = [];
+  try {
+    const classifiedData = await fs.readFile(classifiedPath, 'utf8');
+    classifiedReviews = JSON.parse(classifiedData);
+  } catch (err: any) {
+    console.error(`Error reading ${classifiedPath}: ${err.message}`);
+  }
+
   let count = 0;
   const failedIds: string[] = [];
 
@@ -216,6 +225,9 @@ export async function reanalyzeMockClassifiedReviews(): Promise<number> {
         break;
       }
 
+      // Apply dynamic sentiment normalization
+      analyzedData.sentiment = normalizeSentimentFromText(raw.review_text, analyzedData.sentiment, raw.rating);
+
       await saveAnalyzedReview({
         raw_review_id: raw.id,
         pain_point: analyzedData.pain_point,
@@ -226,6 +238,21 @@ export async function reanalyzeMockClassifiedReviews(): Promise<number> {
         summary: analyzedData.summary,
         confidence: analyzedData.confidence,
       });
+
+      // Update in local classified_reviews.json progressively
+      const idx = classifiedReviews.findIndex(cr => cr.external_id === raw.external_id);
+      if (idx !== -1) {
+        classifiedReviews[idx].analysis = {
+          pain_point: analyzedData.pain_point,
+          discovery_behavior: analyzedData.discovery_behavior,
+          user_need: analyzedData.user_need,
+          sentiment: analyzedData.sentiment,
+          theme: analyzedData.theme,
+          summary: analyzedData.summary,
+          confidence: analyzedData.confidence,
+        };
+        await fs.writeFile(classifiedPath, JSON.stringify(classifiedReviews, null, 2), 'utf8');
+      }
 
       count++;
 
@@ -251,7 +278,7 @@ export async function reanalyzeMockClassifiedReviews(): Promise<number> {
     if (reviewIdx < total) {
       const isGeminiActive = isGroqRateLimited();
       if (isGeminiActive) {
-        await new Promise(r => setTimeout(r, 7000));
+        await new Promise(r => setTimeout(r, 2200));
       } else {
         await new Promise(r => setTimeout(r, 200));
       }
@@ -618,6 +645,15 @@ export async function generateAnalysisSummary(): Promise<AnalysisSummary> {
     negativePercentage: Math.round((sentimentCounts.negative / totalAnalyzed) * 100),
   };
 
+  // Query the latest scraped_at from raw_reviews to show on the dashboard
+  const { data: latestScrape } = await supabaseAdmin
+    .from('raw_reviews')
+    .select('scraped_at')
+    .order('scraped_at', { ascending: false })
+    .limit(1);
+
+  const lastScrapedAt = latestScrape && latestScrape.length > 0 ? latestScrape[0].scraped_at : null;
+
   return {
     totalReviews,
     totalAnalyzedReviews,
@@ -626,7 +662,8 @@ export async function generateAnalysisSummary(): Promise<AnalysisSummary> {
     topUserNeeds,
     topThemes,
     topDiscoveryBehaviors,
-    sentimentSplit
+    sentimentSplit,
+    lastScrapedAt
   };
 }
 
@@ -697,6 +734,25 @@ export function passesLocalFilter(text: string): boolean {
     return false;
   }
 
+  // 3. Exclude non-English reviews (like Spanish)
+  const lower = trimmed.toLowerCase();
+  const nonEnglishPatterns = [
+    /\bque\b/i, /\bel\b/i, /\bla\b/i, /\blos\b/i, /\blas\b/i,
+    /\bcon\b/i, /\bpara\b/i, /\bpor\b/i, /\bdel\b/i, /\bcomo\b/i,
+    /\bpero\b/i, /\bsu\b/i, /\btu\b/i, /\beste\b/i, /\besta\b/i,
+    /\bse\b/i, /\bsi\b/i, /\bal\b/i, /\buna\b/i, /\bmas\b/i,
+    /\bya\b/i, /\bmuy\b/i, /\bcuenta\b/i, /\bdificil\b/i, /\bencontrar\b/i
+  ];
+  let nonEnglishMatches = 0;
+  for (const pattern of nonEnglishPatterns) {
+    if (pattern.test(lower)) {
+      nonEnglishMatches++;
+    }
+  }
+  if (nonEnglishMatches >= 2) {
+    return false;
+  }
+
   return true;
 }
 
@@ -729,7 +785,30 @@ export async function reanalyzeReviewsFromFile(limit?: number): Promise<number> 
     classifiedReviews = [];
   }
 
-  const classifiedIds = new Set<string>(classifiedReviews.map(r => r.external_id));
+  // Fetch existing analyzed external_ids from database to prevent duplicate classifications
+  let databaseAnalyzedIds = new Set<string>();
+  try {
+    const { data: existingAnalyzed, error } = await supabaseAdmin
+      .from('analyzed_reviews')
+      .select('raw_reviews (external_id)');
+
+    if (error) {
+      console.error('Error fetching existing analyzed external_ids from database:', error.message);
+    } else if (existingAnalyzed) {
+      for (const r of existingAnalyzed as any[]) {
+        if (r.raw_reviews?.external_id) {
+          databaseAnalyzedIds.add(r.raw_reviews.external_id);
+        }
+      }
+    }
+  } catch (err: any) {
+    console.error('Error fetching existing analyzed external_ids:', err.message);
+  }
+
+  const classifiedIds = new Set<string>([
+    ...classifiedReviews.map(r => r.external_id),
+    ...databaseAnalyzedIds
+  ]);
   let pendingReviews = rawReviews.filter(r => !classifiedIds.has(r.external_id));
   const initialPendingCount = pendingReviews.length;
 
@@ -744,6 +823,9 @@ export async function reanalyzeReviewsFromFile(limit?: number): Promise<number> 
   scrapeState.stage = 'classifying';
   scrapeState.totalPending = pendingReviews.length;
   scrapeState.classifiedCount = 0;
+  const classifyEstimate = Math.round(pendingReviews.length * 0.8);
+  scrapeState.estimatedDuration = classifyEstimate;
+  scrapeState.estimatedTimeRemaining = classifyEstimate;
 
   console.log(`Loaded ${rawReviews.length} raw reviews from file.`);
   console.log(`Already classified: ${classifiedIds.size}.`);
@@ -760,8 +842,15 @@ export async function reanalyzeReviewsFromFile(limit?: number): Promise<number> 
   let total = pendingReviews.length;
 
   for (const review of pendingReviews) {
+    // Check for cancellation (e.g. from pipeline timeout)
+    if (scrapeState.cancelled) {
+      console.log(`[Classifier] ⚠ Cancellation requested — stopping after ${count}/${total} reviews.`);
+      break;
+    }
+
     count++;
     scrapeState.classifiedCount = count;
+    scrapeState.estimatedTimeRemaining = Math.max(1, Math.round((total - count) * 0.8));
     const geminiMode = isGroqRateLimited();
 
     // Batch delay to avoid Groq rate limit: wait 2 seconds every 10 reviews
@@ -926,23 +1015,7 @@ export async function importClassifiedReviews(): Promise<void> {
     }));
   }
 
-  // Clear the database tables completely so the dashboard only shows the new data
-  console.log('[Importer] Clearing all existing reviews from Database to refresh dashboard with new data...');
-  const { error: delAnalyzedErr } = await supabaseAdmin
-    .from('analyzed_reviews')
-    .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000');
-  if (delAnalyzedErr) {
-    console.error(`[Importer] Error clearing analyzed reviews: ${delAnalyzedErr.message}`);
-  }
 
-  const { error: delRawErr } = await supabaseAdmin
-    .from('raw_reviews')
-    .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000');
-  if (delRawErr) {
-    console.error(`[Importer] Error clearing raw reviews: ${delRawErr.message}`);
-  }
 
   console.log(`[Importer] Found ${rawReviews.length} raw reviews and ${classifiedReviews.length} classified reviews in local files. Importing to Supabase...`);
 
@@ -996,16 +1069,36 @@ export async function importClassifiedReviews(): Promise<void> {
     }
   }
 
+  // Fetch existing analyzed raw_review_ids from database to prevent duplicate entries
+  const { data: existingAnalyzedData, error: fetchAnalyzedErr } = await supabaseAdmin
+    .from('analyzed_reviews')
+    .select('raw_review_id');
+
+  if (fetchAnalyzedErr) {
+    console.error(`[Importer] Error fetching existing analyzed reviews: ${fetchAnalyzedErr.message}`);
+  }
+
+  const existingRawReviewIds = new Set((existingAnalyzedData || []).map(r => r.raw_review_id));
+
   // Step 3: Insert new analyzed reviews
   const analyzedReviewsData = classifiedReviews.map(r => {
     const rawId = rawIdMap.get(r.external_id);
-    if (!rawId) return null;
+    if (!rawId || existingRawReviewIds.has(rawId)) return null;
+
+    // Parse rating from review text if embedded (e.g. "Rating: 5 Stars")
+    let rating = null;
+    const text = r.review_text || '';
+    const ratingMatch = text.match(/Rating:\s*(\d+)\s*Star/i);
+    if (ratingMatch && ratingMatch[1]) {
+      rating = parseInt(ratingMatch[1], 10);
+    }
+
     return {
       raw_review_id: rawId,
       pain_point: r.analysis.pain_point,
       discovery_behavior: r.analysis.discovery_behavior,
       user_need: r.analysis.user_need,
-      sentiment: normalizeSentimentFromText(r.review_text || '', r.analysis.sentiment),
+      sentiment: normalizeSentimentFromText(text, r.analysis.sentiment, rating),
       theme: r.analysis.theme,
       summary: r.analysis.summary,
       confidence: r.analysis.confidence,

@@ -18,5 +18,6 @@ export interface AnalysisSummary {
     neutralPercentage: number;
     negativePercentage: number;
   };
+  lastScrapedAt?: string | null;
 }
 
