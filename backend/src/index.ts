@@ -142,6 +142,10 @@ console.log('[Scraper] ⏰ Scheduled: daily at midnight UTC');
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 
+app.get('/', (req: Request, res: Response) => {
+  res.send('Spotify Review Engine Backend API is running successfully!');
+});
+
 app.post('/api/ask', async (req: Request, res: Response) => {
   try {
     const body: AskQuestionRequest = req.body;
